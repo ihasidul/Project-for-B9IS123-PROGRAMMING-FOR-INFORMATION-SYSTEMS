@@ -18,11 +18,21 @@ Will be added more.
 
 
 ## 🧑‍💻 Technologies Used
-Will be added.
-
+- Javascript
+- Python
+_
 ## 📁 Project Structure
 Will be added.
 
 ## 📦 Installation
 
 Will be added.
+
+
+## 📋 Todo
+- [ ] Narrow down the requirements into specific use cases.
+- [ ] Design the DB around the features.
+- [ ] Design the APIs for the system.
+- [ ] Design the frontend for the system.
+- [ ] Write code for frontend and backend.
+
