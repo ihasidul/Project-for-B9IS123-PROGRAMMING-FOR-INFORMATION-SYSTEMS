@@ -14,13 +14,15 @@ This project is being developed as part of the coursework for the B9IS123 PROGRA
 - Farmers can list their produces on the site.
 - Businesses will post their bulk needs on the site.
 - General customer will buy from listed product.
-Will be added more.
 
+See the full feature list [here](./docs/features.md)
 
 ## 🧑‍💻 Technologies Used
 - Javascript
 - Python
-_
+- FastAPI
+- React
+
 ## 📁 Project Structure
 Will be added.
 
