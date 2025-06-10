@@ -8,7 +8,7 @@ language_tabs:
 
 # Programming Project Backend/User
 
-## GET Get User Profile
+## 1. GET Get User Profile
 
 GET /api/v1/user
 
@@ -28,7 +28,7 @@ GET /api/v1/user
 
 ### Responses Data Schema
 
-## PATCH Update User Profile
+## 2. PATCH Update User Profile
 
 PATCH /api/v1/user
 
