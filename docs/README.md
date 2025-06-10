@@ -1,3 +1,5 @@
+# Project Inspiration
+
 ## Company Description
 
 CrowdFarming is a European platform that connects consumers directly with organic farmers, enabling them to buy seasonal produce or adopt trees and animals to receive their harvests. It eliminates intermediaries, allowing farmers to set fair prices while reducing food waste and environmental impact. The platform supports farmers with logistics, packaging, and customer service, promoting sustainable and transparent agriculture across Europe.
@@ -13,3 +15,11 @@ https://www.crowdfarming.com/en
 ## Google Maps link to the company
 
 https://maps.app.goo.gl/gTwiezcw1yAh9WTx9
+
+## Docs
+
+[Features](./features.md)
+
+[APIs](./APIs.md)
+
+[References](./references.md)
