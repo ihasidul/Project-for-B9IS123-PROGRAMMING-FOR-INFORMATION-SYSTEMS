@@ -1,12 +1,17 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
+import '@fontsource/roboto/300.css';
+import '@fontsource/roboto/400.css';
+import '@fontsource/roboto/500.css';
+import '@fontsource/roboto/700.css';
+import StickyHeadTable from "./Table.jsx";
+
 
 const App = () => {
   return (
     <StrictMode>
         <div>
-            <h1>Welcome to the React App</h1>
-            <p>This is a simple React application.</p>
+            <StickyHeadTable />
         </div>
     </StrictMode>
   );
