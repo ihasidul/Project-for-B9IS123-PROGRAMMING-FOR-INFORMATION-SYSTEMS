@@ -49,9 +49,9 @@ const rows = data.map((product) => ({
   name: product.name,
   description: product.description,
   price: product.price,
-  status: product.status,
-  category: product.category,
-  photo: product.photo ? <img src={product.photo} alt={product.name} style={{ width: '50px', height: '50px' }} /> : 'No Image',
+  status: product.is_active,
+  category: product.category_id,
+  photo: product.photo ? <img src={product.photo_url} alt={product.name} style={{ width: '50px', height: '50px' }} /> : 'No Image',
 }));
 
 export default function StickyHeadTable() {
