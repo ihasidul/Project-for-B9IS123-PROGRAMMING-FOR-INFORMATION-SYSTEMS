@@ -4,14 +4,14 @@ import '@fontsource/roboto/300.css';
 import '@fontsource/roboto/400.css';
 import '@fontsource/roboto/500.css';
 import '@fontsource/roboto/700.css';
-import StickyHeadTable from "./Table.jsx";
+import ProductTable from "./ProductTable.jsx";
 
 
 const App = () => {
   return (
     <StrictMode>
         <div>
-            <StickyHeadTable />
+            <ProductTable />
         </div>
     </StrictMode>
   );

@@ -50,11 +50,11 @@ const rows = data.map((product) => ({
   description: product.description,
   price: product.price,
   status: product.is_active,
-  category: product.category_id,
+  category: product.category,
   photo: product.photo ? <img src={product.photo_url} alt={product.name} style={{ width: '50px', height: '50px' }} /> : 'No Image',
 }));
 
-export default function StickyHeadTable() {
+export default function ProductTable() {
   const [page, setPage] = React.useState(0);
   const [rowsPerPage, setRowsPerPage] = React.useState(10);
 
