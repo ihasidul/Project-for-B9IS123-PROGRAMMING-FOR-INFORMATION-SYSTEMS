@@ -2,6 +2,7 @@ from sqlalchemy import String, Integer, Float, Boolean, ForeignKey, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from typing import Optional, List
 from apps.common.models import BaseDatabaseModel
+from apps.user.models import User
 
 
 class Category(BaseDatabaseModel):
@@ -35,7 +36,12 @@ class Product(BaseDatabaseModel):
     category_id: Mapped[Optional[int]] = mapped_column(
         Integer, ForeignKey("category.id"), nullable=True
     )
-
+    product_owner_id: Mapped[Optional[int]] = mapped_column(
+        Integer, ForeignKey("user.id"), nullable=True
+    )
+    product_owner: Mapped[Optional[User]] = relationship(
+        "User", back_populates="products", foreign_keys=[product_owner_id]
+    )
     category: Mapped[Optional[Category]] = relationship(
         "Category", back_populates="products"
     )
