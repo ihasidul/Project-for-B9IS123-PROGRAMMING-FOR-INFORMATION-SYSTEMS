@@ -1,6 +1,6 @@
 from fastapi.encoders import jsonable_encoder
 
-from apps.product.db import get_all_products
+from apps.product.services import get_all_products
 
 
 def get_all_product_view(query_params, db)-> list:

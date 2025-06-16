@@ -1,4 +1,5 @@
-from sqlalchemy import Column, Integer, String, Enum
+from datetime import datetime, timezone
+from sqlalchemy import Column, Integer, String, Enum, DateTime 
 from sqlalchemy.orm import declarative_base
 import enum
 
@@ -16,3 +17,9 @@ class User(Base):
     email = Column(String(100), unique=True, nullable=False)
     hashed_password = Column(String(255), nullable=False)
     user_type = Column(Enum(UserTypeEnum), nullable=False)
+    created_at = Column(DateTime, default=datetime.now(timezone.utc), nullable=False)
+    updated_at = Column(DateTime, 
+                        default=datetime.now(timezone.utc),
+                        onupdate=datetime.now(timezone.utc),
+                        nullable=False)
+    
