@@ -59,15 +59,10 @@ def delete_product_route(product_id: int, db=Depends(get_db)):
     """
     print("DELETE IS CALLED")
     try:
-        is_deleted = delete_product_view(product_id, db)
+        delete_return = delete_product_view(product_id, db)
 
-        if not is_deleted:
-            raise HTTPException(status_code=404, detail=f"Product with id: {product_id} not found")
-        return CustomJSONResponse(
-            content={},
-            message=f"Product with id: {product_id} is deleted successfully",
-            status_code=201
-        )
+        return  delete_return
     except Exception as e:
         print(f"Error in create_product_route: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
+   

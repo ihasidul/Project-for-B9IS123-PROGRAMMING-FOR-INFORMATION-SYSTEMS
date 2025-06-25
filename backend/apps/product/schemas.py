@@ -13,3 +13,12 @@ class ProductCreate(BaseModel):
     price: float
     photo_url: str | None = None
     category_id: int | None = None
+
+
+class ProductUpdate(BaseModel):
+    name: str | None = None
+    description: str | None = None
+    price: float | None = None
+    photo_url: str | None = None
+    category_id: int | None = None
+
