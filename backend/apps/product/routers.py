@@ -3,7 +3,7 @@ from fastapi import HTTPException
 from fastapi import Depends
 from apps.product.schemas import ProductListQueryParams,ProductCreate
 from apps.common.database import get_db
-from apps.product.views import get_all_product_view, create_product_view
+from apps.product.views import get_all_product_view, create_product_view, delete_product_view
 from apps.common.custom_response import CustomJSONResponse
 
 router = APIRouter(
@@ -50,4 +50,24 @@ def create_product_route(product: ProductCreate, db=Depends(get_db)):
     except Exception as e:
         print(f"Error in create_product_route: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e)) 
-    
+
+
+@router.delete("/{product_id}")
+def delete_product_route(product_id: int, db=Depends(get_db)):
+    """
+    Delete a product.
+    """
+    print("DELETE IS CALLED")
+    try:
+        is_deleted = delete_product_view(product_id, db)
+
+        if not is_deleted:
+            raise HTTPException(status_code=404, detail=f"Product with id: {product_id} not found")
+        return CustomJSONResponse(
+            content={},
+            message=f"Product with id: {product_id} is deleted successfully",
+            status_code=201
+        )
+    except Exception as e:
+        print(f"Error in create_product_route: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))

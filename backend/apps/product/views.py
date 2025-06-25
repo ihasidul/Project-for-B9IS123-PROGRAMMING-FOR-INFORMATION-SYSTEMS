@@ -1,7 +1,8 @@
 from fastapi.encoders import jsonable_encoder
 from sqlalchemy.orm import Session
-from apps.product.services import get_all_products, create_product
+from apps.product.services import get_all_products, create_product, delete_product
 from apps.product.schemas import ProductCreate, ProductListQueryParams
+from apps.common.custom_response import CustomJSONResponse
 
 
 def get_all_product_view(query_params: ProductListQueryParams, db: Session)-> list:
@@ -60,3 +61,29 @@ def create_product_view(product:ProductCreate , db: Session) -> dict:
     except Exception as e:
         print(f"Error in create_product_view: {str(e)}")
         raise Exception(f"Error in create_product_view: {str(e)}")
+    
+
+def delete_product_view(product_id: int, db: Session) -> CustomJSONResponse:
+    """
+    Delete a product by its ID.
+    """
+    try:
+        print(f"Deleting product with ID: {product_id}")
+        is_deleted = delete_product(db_session=db, product_id=product_id)
+        if is_deleted:
+            print(f"Product with ID {product_id} deleted successfully.")
+            return CustomJSONResponse(
+                content={},
+                message=f"Product with ID {product_id} deleted successfully.",
+                status_code=200
+            )
+        else:
+            print(f"Product with ID {product_id} not found.")
+            return CustomJSONResponse(
+                content={},
+                message=f"Product with ID {product_id} not found.",
+                status_code=404
+            )
+    except Exception as e:
+        print(f"Error in delete_product_view: {str(e)}")
+        raise Exception(f"Error in delete_product_view: {str(e)}")
