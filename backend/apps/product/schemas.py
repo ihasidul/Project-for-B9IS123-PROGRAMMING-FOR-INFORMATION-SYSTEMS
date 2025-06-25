@@ -6,3 +6,10 @@ class ProductListQueryParams(BaseModel):
     page: Annotated[int, conint(gt=0)] = 1
     limit: Annotated[int, conint(gt=0)] = 10
     search: str | None = None
+
+class ProductCreate(BaseModel):
+    name: str
+    description: str | None = None
+    price: float
+    photo_url: str | None = None
+    category_id: int | None = None
