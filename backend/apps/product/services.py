@@ -30,7 +30,31 @@ def create_product(db_session: Session, product_data: dict):
     except Exception as e:
         print(f"Error creating product: {str(e)}")
         raise Exception(f"Error creating product: {str(e)}")
-    
+
+def update_product(db_session: Session, product_id: int, product_data: dict) -> Product:
+    """
+    Update an existing product by its ID in the sqlite db using SQLAlchemy ORM (sync).
+    """
+    try:
+        product = db_session.query(Product).filter(Product.id == product_id).first()
+        print(f"The Product: {product}")
+        
+        if not product:
+            print(f"Product with ID {product_id} not found.")
+            raise Exception(f"Product with ID {product_id} not found.")
+        
+        for key, value in product_data.items():
+            setattr(product, key, value)
+        
+        db_session.commit()
+        db_session.refresh(product)
+        print(f"Product with ID {product_id} updated successfully.")
+        return product
+    except Exception as e:
+        print(f"Error updating product: {str(e)}")
+        raise Exception(f"Error updating product: {str(e)}")
+
+
 
 def delete_product(db_session: Session, product_id: int) -> bool:
     """
@@ -51,4 +75,4 @@ def delete_product(db_session: Session, product_id: int) -> bool:
     except Exception as e:
         print(f"Error deleting product: {str(e)}")
         raise Exception(f"Error deleting product: {str(e)}")
-        return False
+    
