@@ -3,4 +3,4 @@ backend/venv
 *.pyc
 .env
 node_modules
-database.db
+*.db
