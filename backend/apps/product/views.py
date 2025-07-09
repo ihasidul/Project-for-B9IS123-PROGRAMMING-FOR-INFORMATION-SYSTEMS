@@ -20,6 +20,7 @@ def get_all_product_view(query_params: ProductListQueryParams, db: Session) -> l
             db_session=db,
             page=query_params.page,
             limit=query_params.limit,
+            search=query_params.search,
         )
         print(f"Fetched {len(products)} products from the database.")
         if not products:
