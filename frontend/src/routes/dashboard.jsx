@@ -9,13 +9,18 @@ export const Route = createFileRoute('/dashboard')({
 function DashboardPage() {
   const { user, isAuthenticated } = useAuth();
 
+  // Debug: Log dashboard page render
+  console.log('DashboardPage rendering...', { user, isAuthenticated: isAuthenticated() });
+
   // Check if user is authenticated
   if (!isAuthenticated()) {
+    console.log('User not authenticated, redirecting to login');
     return <Navigate to="/login" />;
   }
 
   // Check if user is a farmer (seller)
   if (user?.userType !== 'seller') {
+    console.log('User is not a seller, showing access denied');
     return (
       <div style={{ padding: '20px', textAlign: 'center' }}>
         <h2>Access Denied</h2>
@@ -25,5 +30,6 @@ function DashboardPage() {
     );
   }
 
+  console.log('User is authenticated seller, rendering FarmerDashboard');
   return <FarmerDashboard />;
 }
