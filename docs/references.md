@@ -4,4 +4,6 @@
 2. [Apidog](https://apidog.com/)
 3. [SQLAlchemy](https://www.sqlalchemy.org/)
 4. [Alembic](https://alembic.sqlalchemy.org/en/latest/)
-5. [Pydantic](https://docs.pydantic.dev/latest/)
+5. [Pydantic](https://docs.pydantic.dev/latest)
+6. [passlib](https://pypi.org/project/passlib/)
+7. [Tastack Router](https://tanstack.com/router/latest)
