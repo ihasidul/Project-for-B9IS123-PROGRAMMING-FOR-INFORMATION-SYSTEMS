@@ -1,18 +1,15 @@
-const API_ROOT_URL = import.meta.env.VITE_API_ROOT_URL;
+import { apiRequest } from "./apiUtils.js";
+
 export default async function getCategory() {
-  console.log("Fetching categories from API", API_ROOT_URL);
-  const response = await fetch(API_ROOT_URL + `/product/category`, {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-    },
-  });
-  if (!response.ok) {
-    throw new Error(`HTTP error! status: ${response.status}`);
-  } else {
-    let responseData = await response.json();
-    console.log("data", responseData);
-    console.log("Response category:", responseData.data.categories);
+  try {
+    console.log("Fetching categories from API");
+
+    const responseData = await apiRequest("/product/category", {
+      method: "GET",
+    });
+
+    console.log("Response data:", responseData);
+    console.log("Response categories:", responseData.data.categories);
 
     if (
       responseData.data.categories &&
@@ -23,5 +20,8 @@ export default async function getCategory() {
       console.warn("No categories found in the response:", responseData);
       return [];
     }
+  } catch (error) {
+    console.error("Error fetching categories:", error);
+    throw error;
   }
 }

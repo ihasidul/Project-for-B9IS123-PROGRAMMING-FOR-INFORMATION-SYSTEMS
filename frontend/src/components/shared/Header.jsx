@@ -1,7 +1,14 @@
-import { AppBar, Toolbar, Typography } from "@mui/material";
+import { AppBar, Toolbar, Typography, Button, Box, Chip } from "@mui/material";
 import { Link } from "@tanstack/react-router";
+import { useAuth } from "../../contexts/AuthContext.jsx";
 
 export default function Header() {
+    const { user, logout, isAuthenticated } = useAuth();
+
+    const handleLogout = () => {
+        logout();
+    };
+
     return (
         <AppBar position="static">
             <Toolbar>
@@ -12,12 +19,49 @@ export default function Header() {
                     sx={{
                         flexGrow: 1,
                         textDecoration: 'none',
-                        colorv: 'inherit',
+                        color: 'inherit',
                         cursor: 'pointer'
                     }}
                 >
                     FarmDirect
                 </Typography>
+
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                    {isAuthenticated() ? (
+                        <>
+                            <Chip
+                                label={`${user.username} (${user.userType})`}
+                                variant="outlined"
+                                sx={{ color: 'white', borderColor: 'white' }}
+                            />
+                            <Button
+                                color="inherit"
+                                onClick={handleLogout}
+                                variant="outlined"
+                            >
+                                Logout
+                            </Button>
+                        </>
+                    ) : (
+                        <>
+                            <Button
+                                color="inherit"
+                                component={Link}
+                                to="/login"
+                            >
+                                Login
+                            </Button>
+                            <Button
+                                color="inherit"
+                                component={Link}
+                                to="/register"
+                                variant="outlined"
+                            >
+                                Register
+                            </Button>
+                        </>
+                    )}
+                </Box>
             </Toolbar>
         </AppBar>
     );

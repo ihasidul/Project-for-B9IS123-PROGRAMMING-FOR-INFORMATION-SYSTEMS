@@ -1,4 +1,5 @@
-const API_ROOT_URL = import.meta.env.VITE_API_ROOT_URL;
+import { apiRequest } from "./apiUtils.js";
+
 export default async function getAllProducts({
   page = 1,
   limit = 10,
@@ -27,27 +28,15 @@ export default async function getAllProducts({
     params.append("max_price", maxPrice);
   }
 
-  console.log(
-    "Fetching products with params:",
-    params.toString(),
-    " from API",
-    API_ROOT_URL
-  );
-  const response = await fetch(
-    `${API_ROOT_URL}/product?${params.toString()}`,
-    {
+  try {
+    console.log("Fetching products with params:", params.toString());
+
+    const responseData = await apiRequest(`/product?${params.toString()}`, {
       method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    }
-  );
-  if (!response.ok) {
-    throw new Error(`HTTP error! status: ${response.status}`);
-  } else {
-    let responseData = await response.json();
-    console.log("data", responseData);
-    console.log("Response product:", responseData.data.products);
+    });
+
+    console.log("Response data:", responseData);
+    console.log("Response products:", responseData.data.products);
 
     if (responseData.data.products && responseData.data.products.length > 0) {
       return responseData.data.products;
@@ -55,5 +44,8 @@ export default async function getAllProducts({
       console.warn("No products found in the response:", responseData);
       return [];
     }
+  } catch (error) {
+    console.error("Error fetching products:", error);
+    throw error;
   }
 }

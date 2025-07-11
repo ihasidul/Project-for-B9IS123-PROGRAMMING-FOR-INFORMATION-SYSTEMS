@@ -6,6 +6,7 @@ import '@fontsource/roboto/500.css';
 import '@fontsource/roboto/700.css';
 import { RouterProvider, createRouter } from '@tanstack/react-router';
 import { routeTree } from './routeTree.gen.ts';
+import { AuthProvider } from './contexts/AuthContext.jsx';
 
 // Create a new router instance
 const router = createRouter({ routeTree });
@@ -13,7 +14,9 @@ const router = createRouter({ routeTree });
 const App = () => {
   return (
     <StrictMode>
-      <RouterProvider router={router} />
+      <AuthProvider>
+        <RouterProvider router={router} />
+      </AuthProvider>
     </StrictMode>
   );
 };
