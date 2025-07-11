@@ -1,15 +1,40 @@
 const API_ROOT_URL = import.meta.env.VITE_API_ROOT_URL;
-export default async function getAllProducts(offset = 0, limit = 10) {
+export default async function getAllProducts({
+  page = 1,
+  limit = 10,
+  search = null,
+  categoryId = null,
+  isActive = null,
+  minPrice = null,
+  maxPrice = null,
+}) {
+  const params = new URLSearchParams();
+  params.append("page", page);
+  params.append("limit", limit);
+  if (search) {
+    params.append("search", search);
+  }
+  if (categoryId) {
+    params.append("category_id", categoryId);
+  }
+  if (isActive !== null) {
+    params.append("is_active", isActive);
+  }
+  if (minPrice) {
+    params.append("min_price", minPrice);
+  }
+  if (maxPrice) {
+    params.append("max_price", maxPrice);
+  }
+
   console.log(
-    "Fetching products with offset:",
-    offset,
-    "and limit:",
-    limit,
+    "Fetching products with params:",
+    params.toString(),
     " from API",
     API_ROOT_URL
   );
   const response = await fetch(
-    API_ROOT_URL + `/product?offset=${offset}&limit=${limit}`,
+    `${API_ROOT_URL}/product?${params.toString()}`,
     {
       method: "GET",
       headers: {
@@ -27,7 +52,7 @@ export default async function getAllProducts(offset = 0, limit = 10) {
     if (responseData.data.products && responseData.data.products.length > 0) {
       return responseData.data.products;
     } else {
-      console.warn("No products found in the response:", data);
+      console.warn("No products found in the response:", responseData);
       return [];
     }
   }
