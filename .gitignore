@@ -4,3 +4,7 @@ backend/venv
 .env
 node_modules
 *.db
+
+# Tanstack Router generated files
+frontend/src/routeTree.gen.ts
+frontend/src/routeTree.gen.js
