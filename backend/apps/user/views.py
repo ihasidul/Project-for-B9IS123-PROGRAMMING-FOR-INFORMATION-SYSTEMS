@@ -31,6 +31,9 @@ def register_user_view(user: CreateUser, db):
             message="User registered successfully",
             status_code=201,
         )
+    except HTTPException:
+        # Re-raise HTTPExceptions as-is (they have proper status codes)
+        raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 

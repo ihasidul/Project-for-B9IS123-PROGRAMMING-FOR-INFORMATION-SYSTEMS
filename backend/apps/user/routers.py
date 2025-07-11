@@ -1,4 +1,4 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
 from fastapi import Depends
 from sqlalchemy.orm import Session
 from apps.common.database import get_db
@@ -17,9 +17,12 @@ def register_user_route(create_user: CreateUser, db=Depends(get_db)):
     """
     try:
         return register_user_view(create_user, db)
+    except HTTPException:
+        # Re-raise HTTPExceptions as-is (they have proper status codes)
+        raise
     except Exception as e:
         print(f"Error in register_user_route: {str(e)}")
-        raise e
+        raise HTTPException(status_code=500, detail=f"Registration failed: {str(e)}")
 
 
 @router.post("/login")
