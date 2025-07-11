@@ -7,3 +7,4 @@
 5. [Pydantic](https://docs.pydantic.dev/latest)
 6. [passlib](https://pypi.org/project/passlib/)
 7. [Tastack Router](https://tanstack.com/router/latest)
+8. [Pytest](https://docs.pytest.org/en/6.2.x/contents.html)
