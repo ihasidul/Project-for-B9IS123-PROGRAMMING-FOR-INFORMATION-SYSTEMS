@@ -15,7 +15,7 @@ export default function Header() {
                 <Typography
                     variant="h6"
                     component={Link}
-                    to="/"
+                    to={isAuthenticated() && user?.userType === 'seller' ? '/dashboard' : '/'}
                     sx={{
                         flexGrow: 1,
                         textDecoration: 'none',
@@ -29,6 +29,15 @@ export default function Header() {
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                     {isAuthenticated() ? (
                         <>
+                            {user?.userType === 'seller' && (
+                                <Button
+                                    color="inherit"
+                                    component={Link}
+                                    to="/dashboard"
+                                >
+                                    Dashboard
+                                </Button>
+                            )}
                             <Chip
                                 label={`${user.username} (${user.userType})`}
                                 variant="outlined"
