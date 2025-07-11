@@ -6,6 +6,7 @@ from apps.product.services import (
     delete_product,
     update_product,
     get_all_product_categories,
+    product_exists_for_user,
 )
 from apps.product.schemas import ProductCreate, ProductListQueryParams, ProductUpdate
 from apps.common.custom_response import CustomJSONResponse
@@ -120,24 +121,31 @@ def get_all_product_view(query_params: ProductListQueryParams, db: Session) -> l
         raise Exception(f"Error in get_all_product_view: {str(e)}")
 
 
-def create_product_view(product: ProductCreate, db: Session) -> dict:
+def create_product_view(
+    product: ProductCreate, db: Session, product_owner_id: int
+) -> CustomJSONResponse:
     """
     Create a new product.
     """
     try:
-        # TODO:
-        # FOR NOW HARD CODING product_owner_id. REMOVE LATER
-        product_owner_id = 1
-        print(f"BEFORe: {product}")
+        # If Product with same name already exists for same owner return already exists
+        existing_product = product_exists_for_user
+        if existing_product:
+            return CustomJSONResponse(
+                content={},
+                message="Product with same name already exists",
+                status_code=400,
+            )
         product_data = product.model_dump(by_alias=True)
+        product_data["product_owner_id"] = product_owner_id
         print(f"Creating product with data: {product_data}")
-        product_data["product_owner_id"] = product_owner_id  # Add product owner ID
         new_product = create_product(db, product_data)
-        if not new_product:
-            raise Exception("Product creation failed")
-
-        print(f"Product created successfully: {new_product}")
-        return jsonable_encoder(new_product)
+        product = jsonable_encoder(new_product)
+        return CustomJSONResponse(
+            content={"product": product},
+            message="Product created successfully",
+            status_code=201,
+        )
     except Exception as e:
         print(f"Error in create_product_view: {str(e)}")
         raise Exception(f"Error in create_product_view: {str(e)}")

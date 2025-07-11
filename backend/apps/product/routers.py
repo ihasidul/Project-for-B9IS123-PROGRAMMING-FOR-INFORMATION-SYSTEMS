@@ -43,19 +43,20 @@ def get_all_product_route(
 
 
 @router.post("")
-def create_product_route(product: ProductCreate, db=Depends(get_db)):
+def create_product_route(
+    request: Request,
+    product: ProductCreate,
+    db=Depends(get_db),
+    is_authenticated=Depends(is_authenticated),
+):
     """
     Create a new product.
     """
     try:
-        new_product = create_product_view(product, db)
-        if not new_product:
-            raise HTTPException(status_code=500, detail="Product creation failed")
-        return CustomJSONResponse(
-            content={"product": new_product},
-            message="Product created successfully",
-            status_code=201,
-        )
+        user_id = request.state.user_id
+        response = create_product_view(product=product, db=db, product_owner_id=user_id)
+        return response
+
     except Exception as e:
         print(f"Error in create_product_route: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))

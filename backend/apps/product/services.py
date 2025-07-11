@@ -144,3 +144,21 @@ def get_all_product_categories(db_session: Session) -> list:
     except Exception as e:
         print(f"Error fetching product categories: {str(e)}")
         raise Exception(f"Error fetching product categories: {str(e)}")
+
+
+def product_exists_for_user(
+    db_session: Session, product_name: str, user_id: int
+) -> bool:
+    """
+    Check if a product with the same name already exists for the user.
+    """
+    try:
+        stmt = select(Product).where(
+            Product.name == product_name, Product.product_owner_id == user_id
+        )
+        result = db_session.execute(stmt)
+        product = result.scalars().first()
+        return product is not False
+    except Exception as e:
+        print(f"Error checking product existence: {str(e)}")
+        raise Exception(f"Error checking product existence: {str(e)}")
