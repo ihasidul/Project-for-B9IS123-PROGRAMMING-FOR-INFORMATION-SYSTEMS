@@ -1,14 +1,21 @@
-from typing import Union
+from typing import Union, Optional
 from sqlalchemy import select, func, or_
 from sqlalchemy.orm import Session
 from apps.product.models import Product
 
 
 def get_all_products(
-    db_session: Session, page: int = 1, limit: int = 10, search: Union[str, None] = None
+    db_session: Session,
+    page: int = 1,
+    limit: int = 10,
+    search: Union[str, None] = None,
+    category_id: Optional[int] = None,
+    is_active: Optional[bool] = None,
+    min_price: Optional[float] = None,
+    max_price: Optional[float] = None,
 ):
     """
-    Fetch products from the sqlite db using SQLAlchemy ORM (sync) with pagination.
+    Fetch products from the sqlite db using SQLAlchemy ORM (sync) with pagination and filtering.
     """
     try:
         offset = (page - 1) * limit
@@ -21,6 +28,14 @@ def get_all_products(
                     func.lower(Product.description).like(search_pattern),
                 )
             )
+        if category_id is not None:
+            stmt = stmt.where(Product.category_id == category_id)
+        if is_active is not None:
+            stmt = stmt.where(Product.is_active == is_active)
+        if min_price is not None:
+            stmt = stmt.where(Product.price >= min_price)
+        if max_price is not None:
+            stmt = stmt.where(Product.price <= max_price)
         stmt = stmt.offset(offset).limit(limit)
         result = db_session.execute(stmt)
         products = result.scalars().all()

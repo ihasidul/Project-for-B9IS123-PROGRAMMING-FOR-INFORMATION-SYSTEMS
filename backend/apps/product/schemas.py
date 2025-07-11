@@ -6,6 +6,10 @@ class ProductListQueryParams(BaseModel):
     page: Annotated[int, conint(gt=0)] = 1
     limit: Annotated[int, conint(gt=0)] = 10
     search: str | None = None
+    category_id: Optional[int] = None
+    is_active: Optional[bool] = None
+    min_price: Optional[float] = None
+    max_price: Optional[float] = None
 
 
 class ProductCreate(BaseModel):
