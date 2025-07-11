@@ -2,6 +2,7 @@ from fastapi import APIRouter, Request
 from fastapi import HTTPException
 from fastapi import Depends
 from apps.product.schemas import ProductListQueryParams, ProductCreate, ProductUpdate
+from apps.user.models import UserTypeEnum
 from apps.common.database import get_db
 from apps.product.views import (
     get_all_product_view,
@@ -9,8 +10,10 @@ from apps.product.views import (
     delete_product_view,
     update_product_view,
     get_all_product_categories_view,
+    get_user_products_view,
 )
 from apps.common.custom_response import CustomJSONResponse
+from apps.common.auth import is_authenticated
 
 router = APIRouter(
     prefix="/product",
@@ -106,4 +109,29 @@ def get_all_product_categories_route(
 
     except Exception as e:
         print(f"Error in get_all_product_category_route: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get("/user-products")
+def get_user_products_route(
+    request: Request,
+    query_params: ProductListQueryParams = Depends(),
+    db=Depends(get_db),
+    is_authenticated=Depends(is_authenticated),
+) -> CustomJSONResponse:
+    """
+    Get all products for the authenticated user.
+    """
+    try:
+        user_id = request.state.user_id
+        user_type = request.state.user_type
+        if user_type == UserTypeEnum.seller.value:
+            response = get_user_products_view(db, user_id, user_type, query_params)
+        else:
+            raise HTTPException(
+                status_code=403, detail="You are not authorized to view this resource"
+            )
+        return response
+    except Exception as e:
+        print(f"Error in get_user_products_route: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))

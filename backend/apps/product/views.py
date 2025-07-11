@@ -11,6 +11,66 @@ from apps.product.schemas import ProductCreate, ProductListQueryParams, ProductU
 from apps.common.custom_response import CustomJSONResponse
 
 
+def get_user_products_view(
+    db: Session, user_id: int, user_type: str, query_params: ProductListQueryParams
+) -> CustomJSONResponse:
+    """
+    Get all products for the authenticated user.
+    Return JSON-serializable list of products.
+    """
+    try:
+        products = get_all_products(
+            db_session=db,
+            page=query_params.page,
+            limit=query_params.limit,
+            search=query_params.search,
+            category_id=query_params.category_id,
+            is_active=query_params.is_active,
+            min_price=query_params.min_price,
+            max_price=query_params.max_price,
+            sort_by=query_params.sort_by,
+            sort_order=query_params.sort_order,
+            user_id=user_id,
+        )
+        print(f"Fetched {len(products)} products from the database.")
+        if not products:
+            print("No products found.")
+            return CustomJSONResponse(
+                content={},
+                message="No products found.",
+                status_code=200,
+            )
+        serialized_products = [
+            {
+                "id": product.id,
+                "name": product.name,
+                "description": product.description,
+                "price": product.price,
+                "photo_url": product.photo_url,
+                "is_active": bool(product.is_active),
+                "category": product.category.name if product.category else None,
+                "category_id": product.category_id,
+                "created_at": product.created_at.isoformat()
+                if product.created_at
+                else None,
+                "updated_at": product.updated_at.isoformat()
+                if product.updated_at
+                else None,
+            }
+            for product in products
+        ]
+
+        print(f"Products fetched: {products}")
+        return CustomJSONResponse(
+            content={"products": jsonable_encoder(serialized_products)},
+            message="User Products",
+            status_code=200,
+        )
+    except Exception as e:
+        print(f"Error in get_user_products_view: {str(e)}")
+        raise Exception(f"Error in get_user_products_view: {str(e)}")
+
+
 def get_all_product_view(query_params: ProductListQueryParams, db: Session) -> list:
     """
     Get all products with optional query parameters for filtering, sorting, and pagination.

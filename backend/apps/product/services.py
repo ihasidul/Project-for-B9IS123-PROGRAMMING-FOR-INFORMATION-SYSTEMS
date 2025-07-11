@@ -15,6 +15,7 @@ def get_all_products(
     max_price: Optional[float] = None,
     sort_by: Optional[str] = "name",
     sort_order: Optional[str] = "asc",
+    user_id: Optional[int] = None,
 ):
     """
     Fetch products from the sqlite db using SQLAlchemy ORM (sync) with pagination, filtering, and sorting.
@@ -32,6 +33,8 @@ def get_all_products(
                     func.lower(Product.description).like(search_pattern),
                 )
             )
+        if user_id is not None:
+            stmt = stmt.where(Product.product_owner_id == user_id)
         if category_id is not None:
             stmt = stmt.where(Product.category_id == category_id)
         if is_active is not None:
