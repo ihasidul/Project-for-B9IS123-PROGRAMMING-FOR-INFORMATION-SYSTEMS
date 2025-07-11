@@ -134,7 +134,180 @@ def test_products(setup_database, test_category, test_user):
 class TestProductAPI:
     """Test product API endpoints."""
 
-    pass
+    def test_get_products_basic(self, test_products):
+        """Test basic product listing."""
+        response = client.get("/api/product")
+
+        assert response.status_code == 200
+        data = response.json()
+        assert "data" in data
+        assert "products" in data["data"]
+        assert len(data["data"]["products"]) > 0
+
+        # Check that timestamp fields are included
+        product = data["data"]["products"][0]
+        assert "created_at" in product
+        assert "updated_at" in product
+        assert product["created_at"] is not None
+        assert product["updated_at"] is not None
+
+    def test_get_products_pagination(self, test_products):
+        """Test product pagination."""
+        # Test first page
+        response = client.get("/api/product?page=1&limit=2")
+        assert response.status_code == 200
+        data = response.json()
+        assert len(data["data"]["products"]) == 2
+
+        # Test second page
+        response = client.get("/api/product?page=2&limit=2")
+        assert response.status_code == 200
+        data = response.json()
+        assert len(data["data"]["products"]) <= 2
+
+    def test_get_products_search(self, test_products):
+        """Test product search functionality."""
+        response = client.get("/api/product?search=apple")
+
+        assert response.status_code == 200
+        data = response.json()
+        products = data["data"]["products"]
+
+        # Should find products containing "apple" (case insensitive)
+        assert len(products) > 0
+        assert any("apple" in product["name"].lower() for product in products)
+
+    def test_get_products_category_filter(self, test_products, test_category):
+        """Test product filtering by category."""
+        response = client.get(f"/api/product?category_id={test_category.id}")
+
+        assert response.status_code == 200
+        data = response.json()
+        products = data["data"]["products"]
+
+        # All products should belong to the test category
+        for product in products:
+            assert product["category_id"] == test_category.id
+
+    def test_get_products_price_filter(self, test_products):
+        """Test product filtering by price range."""
+        response = client.get("/api/product?min_price=3&max_price=6")
+
+        assert response.status_code == 200
+        data = response.json()
+        products = data["data"]["products"]
+
+        # All products should be within price range
+        for product in products:
+            assert 3 <= product["price"] <= 6
+
+    def test_get_products_sort_by_name_asc(self, test_products):
+        """Test sorting products by name (ascending)."""
+        response = client.get("/api/product?sort_by=name&sort_order=asc")
+
+        assert response.status_code == 200
+        data = response.json()
+        products = data["data"]["products"]
+
+        # Check if products are sorted by name (A-Z)
+        names = [product["name"] for product in products]
+        assert names == sorted(names)
+
+    def test_get_products_sort_by_name_desc(self, test_products):
+        """Test sorting products by name (descending)."""
+        response = client.get("/api/product?sort_by=name&sort_order=desc")
+
+        assert response.status_code == 200
+        data = response.json()
+        products = data["data"]["products"]
+
+        # Check if products are sorted by name (Z-A)
+        names = [product["name"] for product in products]
+        assert names == sorted(names, reverse=True)
+
+    def test_get_products_sort_by_price_asc(self, test_products):
+        """Test sorting products by price (ascending)."""
+        response = client.get("/api/product?sort_by=price&sort_order=asc")
+
+        assert response.status_code == 200
+        data = response.json()
+        products = data["data"]["products"]
+
+        # Check if products are sorted by price (low to high)
+        prices = [product["price"] for product in products]
+        assert prices == sorted(prices)
+
+    def test_get_products_sort_by_price_desc(self, test_products):
+        """Test sorting products by price (descending)."""
+        response = client.get("/api/product?sort_by=price&sort_order=desc")
+
+        assert response.status_code == 200
+        data = response.json()
+        products = data["data"]["products"]
+
+        # Check if products are sorted by price (high to low)
+        prices = [product["price"] for product in products]
+        assert prices == sorted(prices, reverse=True)
+
+    def test_get_products_sort_by_created_at(self, test_products):
+        """Test sorting products by creation date."""
+        response = client.get("/api/product?sort_by=created_at&sort_order=desc")
+
+        assert response.status_code == 200
+        data = response.json()
+        products = data["data"]["products"]
+
+        # Check that created_at field is present and not None
+        for product in products:
+            assert "created_at" in product
+            assert product["created_at"] is not None
+
+    def test_get_products_invalid_sort_field(self, test_products):
+        """Test handling of invalid sort field."""
+        response = client.get("/api/product?sort_by=invalid_field&sort_order=asc")
+
+        # Should return 422 for invalid sort field (validation error)
+        assert response.status_code == 422
+        data = response.json()
+        assert "detail" in data
+
+    def test_get_products_combined_filters(self, test_products, test_category):
+        """Test combining multiple filters and sorting."""
+        response = client.get(
+            f"/api/product?category_id={test_category.id}&min_price=2&max_price=10&sort_by=price&sort_order=asc&search=a"
+        )
+
+        assert response.status_code == 200
+        data = response.json()
+        products = data["data"]["products"]
+
+        # Check that all filters are applied
+        for product in products:
+            assert product["category_id"] == test_category.id
+            assert 2 <= product["price"] <= 10
+            assert (
+                "a" in product["name"].lower() or "a" in product["description"].lower()
+            )
+
+
+class TestProductCategories:
+    """Test product category endpoints."""
+
+    def test_get_categories(self, test_category):
+        """Test getting product categories."""
+        response = client.get("/api/product/category")
+
+        assert response.status_code == 200
+        data = response.json()
+        assert "data" in data
+        assert "categories" in data["data"]
+        assert len(data["data"]["categories"]) > 0
+
+        # Check category structure
+        category = data["data"]["categories"][0]
+        assert "id" in category
+        assert "name" in category
+        assert "description" in category
 
 
 if __name__ == "__main__":
