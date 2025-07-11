@@ -57,7 +57,7 @@ export const AuthProvider = ({ children }) => {
       localStorage.setItem('farmDirectToken', access_token);
       localStorage.setItem('farmDirectUser', JSON.stringify(userData));
 
-      return { success: true };
+      return { success: true, user: userData };
     } catch (error) {
       console.error('Login error:', error);
       return { success: false, error: error.message };

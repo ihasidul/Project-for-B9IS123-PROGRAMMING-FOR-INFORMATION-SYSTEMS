@@ -39,10 +39,14 @@ const LoginForm = () => {
 
     try {
       const result = await login(formData.username, formData.password);
-      
+
       if (result.success) {
-        // Redirect to home page or dashboard
-        navigate({ to: '/' });
+        // Redirect based on user type from login result
+        if (result.user?.userType === 'seller') {
+          navigate({ to: '/dashboard' });
+        } else {
+          navigate({ to: '/' });
+        }
       } else {
         setError(result.error || 'Login failed');
       }
