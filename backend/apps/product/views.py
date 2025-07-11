@@ -129,7 +129,11 @@ def create_product_view(
     """
     try:
         # If Product with same name already exists for same owner return already exists
-        existing_product = product_exists_for_user
+        existing_product = product_exists_for_user(
+            db_session=db,
+            product_name=product.name,
+            user_id=product_owner_id,
+        )
         if existing_product:
             return CustomJSONResponse(
                 content={},

@@ -158,7 +158,7 @@ def product_exists_for_user(
         )
         result = db_session.execute(stmt)
         product = result.scalars().first()
-        return product is not False
+        return product is not None
     except Exception as e:
         print(f"Error checking product existence: {str(e)}")
         raise Exception(f"Error checking product existence: {str(e)}")
