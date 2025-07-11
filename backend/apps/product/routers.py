@@ -8,6 +8,7 @@ from apps.product.views import (
     create_product_view,
     delete_product_view,
     update_product_view,
+    get_all_product_categories_view,
 )
 from apps.common.custom_response import CustomJSONResponse
 
@@ -88,4 +89,21 @@ def update_product_route(product_id: int, product: ProductUpdate, db=Depends(get
         return updated_product
     except Exception as e:
         print(f"Error in update_product_route: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get("/category")
+def get_all_product_categories_route(
+    request: Request,
+    db=Depends(get_db),
+) -> CustomJSONResponse:
+    """
+    Get all product Category.
+    """
+    try:
+        response = get_all_product_categories_view(db)
+        return response
+
+    except Exception as e:
+        print(f"Error in get_all_product_category_route: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))

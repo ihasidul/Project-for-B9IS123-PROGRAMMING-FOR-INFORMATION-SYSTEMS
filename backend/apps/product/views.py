@@ -5,6 +5,7 @@ from apps.product.services import (
     create_product,
     delete_product,
     update_product,
+    get_all_product_categories,
 )
 from apps.product.schemas import ProductCreate, ProductListQueryParams, ProductUpdate
 from apps.common.custom_response import CustomJSONResponse
@@ -127,3 +128,35 @@ def update_product_view(
     except Exception as e:
         print(f"Error in update_product_view: {str(e)}")
         raise Exception(f"Error in update_product_view: {str(e)}")
+
+
+def get_all_product_categories_view(db: Session) -> CustomJSONResponse:
+    """
+    Get all categories.
+    """
+    try:
+        data = get_all_product_categories(db_session=db)
+        if not data:
+            print("No categories found.")
+            return CustomJSONResponse(
+                content={},
+                message="No categories found.",
+                status_code=404,
+            )
+        serialized_categories = [
+            {
+                "id": category.id,
+                "name": category.name,
+                "description": category.description,
+                "is_active": category.is_active,
+            }
+            for category in data
+        ]
+        return CustomJSONResponse(
+            content={"categories": jsonable_encoder(serialized_categories)},
+            message="Product Categories List",
+            status_code=200,
+        )
+    except Exception as e:
+        print(f"Error in get_all_product_category_view: {str(e)}")
+        raise Exception(f"Error in get_all_product_category_view: {str(e)}")

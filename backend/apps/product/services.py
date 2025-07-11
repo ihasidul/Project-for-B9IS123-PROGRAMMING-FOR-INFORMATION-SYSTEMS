@@ -1,7 +1,7 @@
 from typing import Union, Optional
 from sqlalchemy import select, func, or_
 from sqlalchemy.orm import Session
-from apps.product.models import Product
+from apps.product.models import Product, Category
 
 
 def get_all_products(
@@ -103,3 +103,17 @@ def delete_product(db_session: Session, product_id: int) -> bool:
     except Exception as e:
         print(f"Error deleting product: {str(e)}")
         raise Exception(f"Error deleting product: {str(e)}")
+
+
+def get_all_product_categories(db_session: Session) -> list:
+    """
+    Fetch all categories from the sqlite db category table using SQLAlchemy ORM (sync).
+    """
+    try:
+        stmt = select(Category)
+        result = db_session.execute(stmt)
+        categories = result.scalars().all()
+        return categories
+    except Exception as e:
+        print(f"Error fetching product categories: {str(e)}")
+        raise Exception(f"Error fetching product categories: {str(e)}")
