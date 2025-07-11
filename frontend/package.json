@@ -12,6 +12,7 @@
   "license": "ISC",
   "description": "",
   "devDependencies": {
+    "@tanstack/router-cli": "^1.127.0",
     "@vitejs/plugin-react": "^4.5.2",
     "prettier": "^3.5.3",
     "vite": "^6.3.5"
@@ -23,6 +24,7 @@
     "@mui/icons-material": "^7.1.1",
     "@mui/material": "^7.1.1",
     "@mui/styled-engine-sc": "^7.1.1",
+    "@tanstack/react-router": "^1.127.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "styled-components": "^6.1.18"
