@@ -1,16 +1,23 @@
+from typing import TYPE_CHECKING
 from datetime import datetime, timezone
 from sqlalchemy import Column, Integer, String, Enum, DateTime 
 from sqlalchemy.orm import declarative_base
 import enum
+from sqlalchemy.orm import Mapped, relationship
+from apps.common.models import BaseDatabaseModel
+from apps.product.models import Product
+# https://docs.python.org/3/library/typing.html#typing.TYPE_CHECKING
 
-Base = declarative_base()
+from typing import List
+if TYPE_CHECKING:
+    from apps.product.models import Product
 
 class UserTypeEnum(enum.Enum):
     business = "business"
     customer = "customer"
     seller = "seller"
 
-class User(Base):
+class User(BaseDatabaseModel):
     __tablename__ = "user"
     id = Column(Integer, primary_key=True, index=True)
     username = Column(String(100), unique=True, nullable=False)
@@ -22,4 +29,4 @@ class User(Base):
                         default=datetime.now(timezone.utc),
                         onupdate=datetime.now(timezone.utc),
                         nullable=False)
-    
+    products: Mapped[List["Product"]] = relationship("Product", back_populates="product_owner")
