@@ -1,8 +1,10 @@
 from typing import TYPE_CHECKING
-from sqlalchemy import String, Integer, Float, Boolean, ForeignKey, Text
+from datetime import datetime, timezone
+from sqlalchemy import String, Integer, Float, Boolean, ForeignKey, Text, DateTime, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from typing import Optional, List
 from apps.common.models import BaseDatabaseModel
+
 if TYPE_CHECKING:
     from apps.user.models import User
 
@@ -38,8 +40,20 @@ class Product(BaseDatabaseModel):
     category_id: Mapped[Optional[int]] = mapped_column(
         Integer, ForeignKey("category.id"), nullable=True
     )
-    
+
     product_owner_id: Mapped[int] = mapped_column(ForeignKey("user.id"), nullable=True)
+    created_at: Mapped[Optional[datetime]] = mapped_column(
+        DateTime(timezone=True),
+        default=lambda: datetime.now(timezone.utc),
+        nullable=True,
+    )
+    updated_at: Mapped[Optional[datetime]] = mapped_column(
+        DateTime(timezone=True),
+        default=lambda: datetime.now(timezone.utc),
+        onupdate=lambda: datetime.now(timezone.utc),
+        nullable=True,
+    )
+
     product_owner: Mapped["User"] = relationship("User", back_populates="products")
     category: Mapped[Optional[Category]] = relationship(
         "Category", back_populates="products"
