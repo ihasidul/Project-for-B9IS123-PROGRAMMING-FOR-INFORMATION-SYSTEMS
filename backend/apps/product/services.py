@@ -1,5 +1,5 @@
 from typing import Union, Optional
-from sqlalchemy import select, func, or_
+from sqlalchemy import select, func, or_, asc, desc
 from sqlalchemy.orm import Session
 from apps.product.models import Product, Category
 
@@ -13,13 +13,17 @@ def get_all_products(
     is_active: Optional[bool] = None,
     min_price: Optional[float] = None,
     max_price: Optional[float] = None,
+    sort_by: Optional[str] = "name",
+    sort_order: Optional[str] = "asc",
 ):
     """
-    Fetch products from the sqlite db using SQLAlchemy ORM (sync) with pagination and filtering.
+    Fetch products from the sqlite db using SQLAlchemy ORM (sync) with pagination, filtering, and sorting.
     """
     try:
         offset = (page - 1) * limit
         stmt = select(Product)
+
+        # Apply filters
         if search:
             search_pattern = f"%{search.lower()}%"
             stmt = stmt.where(
@@ -36,6 +40,26 @@ def get_all_products(
             stmt = stmt.where(Product.price >= min_price)
         if max_price is not None:
             stmt = stmt.where(Product.price <= max_price)
+
+        # Apply sorting
+        sort_by_field = sort_by or "name"
+        sort_order_direction = sort_order or "asc"
+
+        # Map sort fields to Product attributes
+        sort_mapping = {
+            "name": Product.name,
+            "price": Product.price,
+            "created_at": Product.created_at,
+            "updated_at": Product.updated_at,
+        }
+
+        sort_column = sort_mapping.get(sort_by_field, Product.name)
+        if sort_order_direction.lower() == "desc":
+            stmt = stmt.order_by(desc(sort_column))
+        else:
+            stmt = stmt.order_by(asc(sort_column))
+
+        # Apply pagination
         stmt = stmt.offset(offset).limit(limit)
         result = db_session.execute(stmt)
         products = result.scalars().all()

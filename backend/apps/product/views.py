@@ -26,6 +26,8 @@ def get_all_product_view(query_params: ProductListQueryParams, db: Session) -> l
             is_active=query_params.is_active,
             min_price=query_params.min_price,
             max_price=query_params.max_price,
+            sort_by=query_params.sort_by,
+            sort_order=query_params.sort_order,
         )
         print(f"Fetched {len(products)} products from the database.")
         if not products:
@@ -40,6 +42,13 @@ def get_all_product_view(query_params: ProductListQueryParams, db: Session) -> l
                 "photo_url": product.photo_url,
                 "is_active": bool(product.is_active),
                 "category": product.category.name if product.category else None,
+                "category_id": product.category_id,
+                "created_at": product.created_at.isoformat()
+                if product.created_at
+                else None,
+                "updated_at": product.updated_at.isoformat()
+                if product.updated_at
+                else None,
             }
             for product in products
         ]

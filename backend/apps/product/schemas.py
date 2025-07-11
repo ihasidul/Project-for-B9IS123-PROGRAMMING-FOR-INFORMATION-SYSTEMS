@@ -1,4 +1,4 @@
-from typing import Annotated, Optional
+from typing import Annotated, Optional, Literal
 from pydantic import BaseModel, conint
 
 
@@ -10,6 +10,8 @@ class ProductListQueryParams(BaseModel):
     is_active: Optional[bool] = None
     min_price: Optional[float] = None
     max_price: Optional[float] = None
+    sort_by: Optional[Literal["name", "price", "created_at", "updated_at"]] = "name"
+    sort_order: Optional[Literal["asc", "desc"]] = "asc"
 
 
 class ProductCreate(BaseModel):
