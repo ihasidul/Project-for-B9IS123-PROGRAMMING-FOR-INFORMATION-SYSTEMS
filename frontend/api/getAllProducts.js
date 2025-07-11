@@ -8,6 +8,8 @@ export default async function getAllProducts({
   isActive = null,
   minPrice = null,
   maxPrice = null,
+  sortBy = "name",
+  sortOrder = "asc",
 }) {
   const params = new URLSearchParams();
   params.append("page", page);
@@ -26,6 +28,12 @@ export default async function getAllProducts({
   }
   if (maxPrice) {
     params.append("max_price", maxPrice);
+  }
+  if (sortBy) {
+    params.append("sort_by", sortBy);
+  }
+  if (sortOrder) {
+    params.append("sort_order", sortOrder);
   }
 
   try {
