@@ -767,6 +767,67 @@ const ProductManagement = () => {
           </Button>
         </DialogActions>
       </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog
+        open={openDeleteDialog}
+        onClose={handleCancelDelete}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle sx={{ display: 'flex', alignItems: 'center', gap: 1, color: 'error.main' }}>
+          <Delete color="error" />
+          Confirm Delete
+        </DialogTitle>
+        <DialogContent>
+          <Typography variant="body1" sx={{ mb: 2 }}>
+            Do you really want to delete this product?
+          </Typography>
+          {productToDelete && (
+            <Box sx={{ p: 2, bgcolor: 'grey.50', borderRadius: 1, border: '1px solid', borderColor: 'grey.200' }}>
+              <Typography variant="subtitle2" color="text.secondary" gutterBottom>
+                Product Details:
+              </Typography>
+              <Typography variant="h6" gutterBottom>
+                {productToDelete.name}
+              </Typography>
+              <Typography variant="body2" color="text.secondary" gutterBottom>
+                Price: ${parseFloat(productToDelete.price).toFixed(2)}
+              </Typography>
+              {productToDelete.category && (
+                <Typography variant="body2" color="text.secondary">
+                  Category: {productToDelete.category}
+                </Typography>
+              )}
+            </Box>
+          )}
+          <Typography variant="body2" color="error.main" sx={{ mt: 2, fontWeight: 500 }}>
+            ⚠️ This action cannot be undone.
+          </Typography>
+        </DialogContent>
+        <DialogActions sx={{ p: 3, gap: 2 }}>
+          <Button
+            onClick={handleCancelDelete}
+            disabled={deleteLoading}
+            variant="outlined"
+            size="large"
+            sx={{ minWidth: 100 }}
+          >
+            Cancel
+          </Button>
+          <Button
+            onClick={handleDeleteProduct}
+            disabled={deleteLoading}
+            variant="contained"
+            color="error"
+            size="large"
+            startIcon={deleteLoading ? <CircularProgress size={20} /> : <Delete />}
+            sx={{ minWidth: 140 }}
+          >
+            {deleteLoading ? 'Deleting...' : 'Yes, Delete'}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 };
