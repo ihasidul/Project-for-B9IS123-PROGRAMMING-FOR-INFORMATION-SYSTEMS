@@ -44,14 +44,14 @@ export default async function getAllProducts({
     });
 
     console.log("Response data:", responseData);
-    console.log("Response products:", responseData.data.products);
+    console.log("Response products:", responseData.data?.products);
+    console.log("Response pagination:", responseData.data?.pagination);
 
-    if (responseData.data.products && responseData.data.products.length > 0) {
-      return responseData.data.products;
-    } else {
-      console.warn("No products found in the response:", responseData);
-      return [];
-    }
+    return {
+      data: responseData.data,
+      message: responseData.message,
+      success: responseData.success || true,
+    };
   } catch (error) {
     console.error("Error fetching products:", error);
     throw error;

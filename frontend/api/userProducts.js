@@ -36,6 +36,7 @@ export default async function getUserProducts(params = {}, token) {
       token
     );
 
+    // Return the response directly since it now includes pagination
     return {
       success: true,
       data: response.data,

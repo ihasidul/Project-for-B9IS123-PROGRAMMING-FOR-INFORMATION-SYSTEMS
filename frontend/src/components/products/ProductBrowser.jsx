@@ -41,7 +41,7 @@ const ProductBrowser = () => {
     setError(null);
 
     try {
-      const productData = await getAllProducts({
+      const result = await getAllProducts({
         page,
         limit,
         search: filters.search || null,
@@ -53,12 +53,13 @@ const ProductBrowser = () => {
         sortOrder: filters.sortOrder || "asc",
       });
 
-      setProducts(productData);
-      
-      // Calculate total pages (this would ideally come from the API)
-      // For now, we'll estimate based on the number of products returned
-      const estimatedTotal = productData.length === limit ? page + 1 : page;
-      setTotalPages(estimatedTotal);
+      setProducts(result.data.products);
+
+      // Use actual pagination data from API
+      setTotalPages(result.data.pagination.pages);
+
+      console.log('Products loaded:', result.data.products);
+      console.log('Pagination info:', result.data.pagination);
       
     } catch (err) {
       setError('Failed to load products. Please try again.');

@@ -134,9 +134,11 @@ const ProductManagement = () => {
       const result = await getUserProducts(params, token);
 
       if (result.success) {
-        setProducts(result.data.products || []);
-        setTotalProducts(result.data.total || 0);
-        console.log('Products fetched successfully:', result.data.products);
+        // Handle API response format: data is nested under result.data
+        setProducts(result.data?.products || []);
+        setTotalProducts(result.data?.pagination?.total || 0);
+        console.log('Products fetched successfully:', result.data?.products);
+        console.log('Pagination info:', result.data?.pagination);
       } else {
         setError(result.error);
         console.error('Failed to fetch products:', result.error);
