@@ -661,7 +661,10 @@ const ProductManagement = () => {
                   </TableCell>
                   <TableCell>${product.price}</TableCell>
                   <TableCell>
-                    {product.category ? product.category.name : 'No category'}
+                    {product.category_id ?
+                      categories.find(cat => cat.id === product.category_id)?.name || 'Unknown Category'
+                      : 'No Category'
+                    }
                   </TableCell>
                   <TableCell>
                     <Chip
