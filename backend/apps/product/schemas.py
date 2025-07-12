@@ -28,3 +28,4 @@ class ProductUpdate(BaseModel):
     price: Optional[float] = None
     photo_url: Optional[str] = None
     category_id: Optional[int] = None
+    is_active: Optional[bool] = None
