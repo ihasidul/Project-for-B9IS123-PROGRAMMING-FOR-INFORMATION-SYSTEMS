@@ -37,7 +37,7 @@ import {
   Add,
 } from '@mui/icons-material';
 import { useAuth } from '../../contexts/AuthContext.jsx';
-import getUserProducts, { createProduct } from '../../../api/userProducts.js';
+import getUserProducts, { createProduct, deleteProduct } from '../../../api/userProducts.js';
 import getCategory from '../../../api/getCategory.js';
 
 const ProductManagement = () => {
@@ -80,6 +80,11 @@ const ProductManagement = () => {
     is_active: true,
     photo_url: ''
   });
+
+  // State for delete confirmation dialog
+  const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
+  const [deleteLoading, setDeleteLoading] = useState(false);
+  const [productToDelete, setProductToDelete] = useState(null);
 
   // Fetch categories on component mount
   useEffect(() => {
@@ -267,6 +272,61 @@ const ProductManagement = () => {
       photo_url: ''
     });
     setOpenCreateDialog(true);
+  };
+
+  // Handle delete product confirmation
+  const handleDeleteClick = (product) => {
+    setProductToDelete(product);
+    setOpenDeleteDialog(true);
+  };
+
+  // Handle delete product
+  const handleDeleteProduct = async () => {
+    if (!productToDelete) return;
+
+    setDeleteLoading(true);
+    setError(null);
+
+    try {
+      const result = await deleteProduct(productToDelete.id, token);
+
+      if (result.success) {
+        // Close dialog and refresh products
+        setOpenDeleteDialog(false);
+        setProductToDelete(null);
+        fetchProducts();
+
+        console.log('Product deleted successfully');
+      } else {
+        // Handle API errors - show message from response for 400-499 errors
+        if (result.error && typeof result.error === 'object' && result.error.message) {
+          setError(result.error.message);
+        } else if (typeof result.error === 'string') {
+          setError(result.error);
+        } else {
+          setError('Failed to delete product');
+        }
+      }
+    } catch (error) {
+      console.error('Error deleting product:', error);
+
+      // Handle network or other errors
+      if (error.response && error.response.status >= 400 && error.response.status < 500) {
+        // 400-499 errors - show message from response
+        const errorMessage = error.response.data?.message || error.response.data?.detail || 'Bad request';
+        setError(errorMessage);
+      } else {
+        setError('Failed to delete product. Please try again.');
+      }
+    } finally {
+      setDeleteLoading(false);
+    }
+  };
+
+  // Cancel delete
+  const handleCancelDelete = () => {
+    setOpenDeleteDialog(false);
+    setProductToDelete(null);
   };
 
   // Debug: Simple early return to test if component renders
@@ -518,7 +578,7 @@ const ProductManagement = () => {
                       <IconButton
                         size="small"
                         color="error"
-                        onClick={() => alert(`Delete product: ${product.name}`)}
+                        onClick={() => handleDeleteClick(product)}
                       >
                         <Delete />
                       </IconButton>
