@@ -37,7 +37,7 @@ import {
   Add,
 } from '@mui/icons-material';
 import { useAuth } from '../../contexts/AuthContext.jsx';
-import getUserProducts, { createProduct, deleteProduct } from '../../../api/userProducts.js';
+import getUserProducts, { createProduct, deleteProduct, updateProduct } from '../../../api/userProducts.js';
 import getCategory from '../../../api/getCategory.js';
 
 const ProductManagement = () => {
@@ -85,6 +85,19 @@ const ProductManagement = () => {
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [productToDelete, setProductToDelete] = useState(null);
+
+  // State for edit product dialog
+  const [openEditDialog, setOpenEditDialog] = useState(false);
+  const [editLoading, setEditLoading] = useState(false);
+  const [productToEdit, setProductToEdit] = useState(null);
+  const [editFormData, setEditFormData] = useState({
+    name: '',
+    description: '',
+    price: '',
+    category_id: '',
+    is_active: true,
+    photo_url: ''
+  });
 
   // Fetch categories on component mount
   useEffect(() => {
@@ -329,6 +342,104 @@ const ProductManagement = () => {
     setProductToDelete(null);
   };
 
+  // Handle edit product click
+  const handleEditClick = (product) => {
+    setProductToEdit(product);
+    setEditFormData({
+      name: product.name || '',
+      description: product.description || '',
+      price: product.price || '',
+      category_id: product.category_id || '',
+      is_active: product.is_active,
+      photo_url: product.photo_url || ''
+    });
+    setOpenEditDialog(true);
+  };
+
+  // Handle edit form input changes
+  const handleEditFormChange = (field) => (event) => {
+    setEditFormData(prev => ({
+      ...prev,
+      [field]: event.target.value
+    }));
+  };
+
+  // Handle update product
+  const handleUpdateProduct = async () => {
+    if (!productToEdit) return;
+
+    setEditLoading(true);
+    setError(null);
+
+    try {
+      const productData = {
+        name: editFormData.name.trim(),
+        description: editFormData.description.trim() || null,
+        price: parseFloat(editFormData.price),
+        category_id: editFormData.category_id || null,
+        is_active: editFormData.is_active,
+        photo_url: editFormData.photo_url.trim() || null,
+      };
+
+      const result = await updateProduct(productToEdit.id, productData, token);
+
+      if (result.success) {
+        // Close dialog and refresh products
+        setOpenEditDialog(false);
+        setProductToEdit(null);
+        setEditFormData({
+          name: '',
+          description: '',
+          price: '',
+          category_id: '',
+          is_active: true,
+          photo_url: ''
+        });
+
+        // Refresh the product list
+        fetchProducts();
+
+        console.log('Product updated successfully:', result.data);
+      } else {
+        // Handle API errors - show message from response for 400-499 errors
+        if (result.error && typeof result.error === 'object' && result.error.message) {
+          setError(result.error.message);
+        } else if (typeof result.error === 'string') {
+          setError(result.error);
+        } else {
+          setError('Failed to update product');
+        }
+      }
+    } catch (error) {
+      console.error('Error updating product:', error);
+
+      // Handle network or other errors
+      if (error.response && error.response.status >= 400 && error.response.status < 500) {
+        // 400-499 errors - show message from response
+        const errorMessage = error.response.data?.message || error.response.data?.detail || 'Bad request';
+        setError(errorMessage);
+      } else {
+        setError('Failed to update product. Please try again.');
+      }
+    } finally {
+      setEditLoading(false);
+    }
+  };
+
+  // Cancel edit
+  const handleCancelEdit = () => {
+    setOpenEditDialog(false);
+    setProductToEdit(null);
+    setEditFormData({
+      name: '',
+      description: '',
+      price: '',
+      category_id: '',
+      is_active: true,
+      photo_url: ''
+    });
+  };
+
   // Debug: Simple early return to test if component renders
   if (!token) {
     return (
@@ -569,7 +680,7 @@ const ProductManagement = () => {
                     <Tooltip title="Edit">
                       <IconButton
                         size="small"
-                        onClick={() => alert(`Edit product: ${product.name}`)}
+                        onClick={() => handleEditClick(product)}
                       >
                         <Edit />
                       </IconButton>
@@ -885,6 +996,232 @@ const ProductManagement = () => {
             sx={{ minWidth: 140 }}
           >
             {deleteLoading ? 'Deleting...' : 'Yes, Delete'}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Edit Product Dialog */}
+      <Dialog
+        open={openEditDialog}
+        onClose={handleCancelEdit}
+        maxWidth="sm"
+        fullWidth
+        slotProps={{
+          paper: {
+            sx: {
+              borderRadius: 2,
+              maxHeight: '90vh',
+            }
+          }
+        }}
+      >
+        <DialogTitle
+          sx={{
+            pb: 1,
+            borderBottom: '1px solid',
+            borderColor: 'divider',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 1
+          }}
+        >
+          <Edit color="primary" />
+          Edit Product
+        </DialogTitle>
+
+        <DialogContent
+          sx={{
+            p: 0,
+            maxHeight: '60vh',
+            overflowY: 'auto',
+            '&::-webkit-scrollbar': {
+              width: '8px',
+            },
+            '&::-webkit-scrollbar-track': {
+              background: '#f1f1f1',
+              borderRadius: '4px',
+            },
+            '&::-webkit-scrollbar-thumb': {
+              background: '#c1c1c1',
+              borderRadius: '4px',
+            },
+            '&::-webkit-scrollbar-thumb:hover': {
+              background: '#a8a8a8',
+            },
+          }}
+        >
+          {/* Form Fields List */}
+          <Box sx={{ p: 0 }}>
+            {/* Product Name */}
+            <Box sx={{ p: 3, borderBottom: '1px solid', borderColor: 'divider' }}>
+              <Typography variant="subtitle2" color="text.secondary" gutterBottom>
+                Product Name *
+              </Typography>
+              <TextField
+                fullWidth
+                placeholder="Enter product name"
+                value={editFormData.name}
+                onChange={handleEditFormChange('name')}
+                error={!editFormData.name.trim()}
+                helperText={!editFormData.name.trim() ? 'Product name is required' : ''}
+                variant="outlined"
+                size="medium"
+              />
+            </Box>
+
+            {/* Description */}
+            <Box sx={{ p: 3, borderBottom: '1px solid', borderColor: 'divider' }}>
+              <Typography variant="subtitle2" color="text.secondary" gutterBottom>
+                Description
+              </Typography>
+              <TextField
+                fullWidth
+                multiline
+                rows={3}
+                placeholder="Enter product description..."
+                value={editFormData.description}
+                onChange={handleEditFormChange('description')}
+                variant="outlined"
+                size="medium"
+              />
+            </Box>
+
+            {/* Price */}
+            <Box sx={{ p: 3, borderBottom: '1px solid', borderColor: 'divider' }}>
+              <Typography variant="subtitle2" color="text.secondary" gutterBottom>
+                Price *
+              </Typography>
+              <TextField
+                fullWidth
+                type="number"
+                placeholder="0.00"
+                value={editFormData.price}
+                onChange={handleEditFormChange('price')}
+                error={!editFormData.price || parseFloat(editFormData.price) <= 0}
+                helperText={!editFormData.price || parseFloat(editFormData.price) <= 0 ? 'Valid price is required' : ''}
+                variant="outlined"
+                size="medium"
+                slotProps={{
+                  input: {
+                    startAdornment: <InputAdornment position="start">$</InputAdornment>,
+                  },
+                }}
+              />
+            </Box>
+
+            {/* Category */}
+            <Box sx={{ p: 3, borderBottom: '1px solid', borderColor: 'divider' }}>
+              <Typography variant="subtitle2" color="text.secondary" gutterBottom>
+                Category
+              </Typography>
+              <FormControl fullWidth variant="outlined" size="medium">
+                <Select
+                  value={editFormData.category_id}
+                  onChange={handleEditFormChange('category_id')}
+                  displayEmpty
+                  renderValue={(selected) => {
+                    if (!selected) {
+                      return <Typography color="text.secondary">Select a category</Typography>;
+                    }
+                    const category = categories.find(cat => cat.id === selected);
+                    return category ? category.name : 'Unknown Category';
+                  }}
+                >
+                  <MenuItem value="">
+                    <Typography color="text.secondary">No Category</Typography>
+                  </MenuItem>
+                  {categories.map((category) => (
+                    <MenuItem key={category.id} value={category.id}>
+                      {category.name}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </Box>
+
+            {/* Photo URL */}
+            <Box sx={{ p: 3, borderBottom: '1px solid', borderColor: 'divider' }}>
+              <Typography variant="subtitle2" color="text.secondary" gutterBottom>
+                Photo URL
+              </Typography>
+              <TextField
+                fullWidth
+                placeholder="https://example.com/image.jpg"
+                value={editFormData.photo_url}
+                onChange={handleEditFormChange('photo_url')}
+                variant="outlined"
+                size="medium"
+              />
+              {editFormData.photo_url && (
+                <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
+                  Preview: {editFormData.photo_url.length > 50 ? `${editFormData.photo_url.substring(0, 50)}...` : editFormData.photo_url}
+                </Typography>
+              )}
+            </Box>
+
+            {/* Status */}
+            <Box sx={{ p: 3 }}>
+              <Typography variant="subtitle2" color="text.secondary" gutterBottom>
+                Status
+              </Typography>
+              <FormControl fullWidth variant="outlined" size="medium">
+                <Select
+                  value={editFormData.is_active}
+                  onChange={handleEditFormChange('is_active')}
+                  renderValue={(selected) => (
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <Chip
+                        label={selected ? 'Active' : 'Inactive'}
+                        color={selected ? 'success' : 'default'}
+                        size="small"
+                      />
+                    </Box>
+                  )}
+                >
+                  <MenuItem value={true}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <Chip label="Active" color="success" size="small" />
+                      <Typography>Product will be visible to customers</Typography>
+                    </Box>
+                  </MenuItem>
+                  <MenuItem value={false}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <Chip label="Inactive" color="default" size="small" />
+                      <Typography>Product will be hidden from customers</Typography>
+                    </Box>
+                  </MenuItem>
+                </Select>
+              </FormControl>
+            </Box>
+          </Box>
+        </DialogContent>
+
+        <DialogActions
+          sx={{
+            p: 3,
+            borderTop: '1px solid',
+            borderColor: 'divider',
+            gap: 2
+          }}
+        >
+          <Button
+            onClick={handleCancelEdit}
+            disabled={editLoading}
+            variant="outlined"
+            size="large"
+            sx={{ minWidth: 100 }}
+          >
+            Cancel
+          </Button>
+          <Button
+            variant="contained"
+            onClick={handleUpdateProduct}
+            disabled={editLoading || !editFormData.name.trim() || !editFormData.price || parseFloat(editFormData.price) <= 0}
+            startIcon={editLoading ? <CircularProgress size={20} /> : <Edit />}
+            size="large"
+            sx={{ minWidth: 140 }}
+          >
+            {editLoading ? 'Updating...' : 'Update Product'}
           </Button>
         </DialogActions>
       </Dialog>
