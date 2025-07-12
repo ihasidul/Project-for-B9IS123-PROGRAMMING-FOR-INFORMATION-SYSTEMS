@@ -63,14 +63,21 @@ def create_product_route(
 
 
 @router.delete("/{product_id}")
-def delete_product_route(product_id: int, db=Depends(get_db)):
+def delete_product_route(
+    request: Request,
+    product_id: int,
+    db=Depends(get_db),
+    is_authenticated=Depends(is_authenticated),
+):
     """
     Delete a product.
     """
     print("DELETE IS CALLED")
     try:
-        delete_return = delete_product_view(product_id, db)
-
+        user_id = request.state.user_id
+        delete_return = delete_product_view(
+            product_id=product_id, user_id=user_id, db=db
+        )
         return delete_return
     except Exception as e:
         print(f"Error in create_product_route: {str(e)}")

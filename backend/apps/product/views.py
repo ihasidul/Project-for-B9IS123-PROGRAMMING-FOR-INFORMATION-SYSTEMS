@@ -155,13 +155,17 @@ def create_product_view(
         raise Exception(f"Error in create_product_view: {str(e)}")
 
 
-def delete_product_view(product_id: int, db: Session) -> CustomJSONResponse:
+def delete_product_view(
+    product_id: int, user_id: int, db: Session
+) -> CustomJSONResponse:
     """
     Delete a product by its ID.
     """
     try:
         print(f"Deleting product with ID: {product_id}")
-        is_deleted = delete_product(db_session=db, product_id=product_id)
+        is_deleted = delete_product(
+            product_id=product_id, user_id=user_id, db_session=db
+        )
         if is_deleted:
             print(f"Product with ID {product_id} deleted successfully.")
             return CustomJSONResponse(

@@ -111,12 +111,16 @@ def update_product(db_session: Session, product_id: int, product_data: dict) -> 
         raise Exception(f"Error updating product: {str(e)}")
 
 
-def delete_product(db_session: Session, product_id: int) -> bool:
+def delete_product(db_session: Session, product_id: int, user_id: int) -> bool:
     """
     Delete a product by its ID from the sqlite db using SQLAlchemy ORM (sync).
     """
     try:
-        product = db_session.query(Product).filter(Product.id == product_id).first()
+        product = (
+            db_session.query(Product)
+            .filter(Product.id == product_id, Product.product_owner_id == user_id)
+            .first()
+        )
         print(f"The Product: {product}")
 
         if not product:
