@@ -24,6 +24,10 @@ import {
   Chip,
   Tooltip,
   InputAdornment,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
 } from '@mui/material';
 import {
   Search,
@@ -33,7 +37,7 @@ import {
   Add,
 } from '@mui/icons-material';
 import { useAuth } from '../../contexts/AuthContext.jsx';
-import getUserProducts from '../../../api/userProducts.js';
+import getUserProducts, { createProduct } from '../../../api/userProducts.js';
 import getCategory from '../../../api/getCategory.js';
 
 const ProductManagement = () => {
@@ -64,6 +68,18 @@ const ProductManagement = () => {
 
   // State for categories
   const [categories, setCategories] = useState([]);
+
+  // State for create product dialog
+  const [openCreateDialog, setOpenCreateDialog] = useState(false);
+  const [createLoading, setCreateLoading] = useState(false);
+  const [formData, setFormData] = useState({
+    name: '',
+    description: '',
+    price: '',
+    category_id: '',
+    is_active: true,
+    photo_url: ''
+  });
 
   // Fetch categories on component mount
   useEffect(() => {
@@ -172,6 +188,87 @@ const ProductManagement = () => {
     setPage(0);
   };
 
+  // Handle create product
+  const handleCreateProduct = async () => {
+    setCreateLoading(true);
+    setError(null);
+
+    try {
+      const productData = {
+        name: formData.name.trim(),
+        description: formData.description.trim() || null,
+        price: parseFloat(formData.price),
+        category_id: formData.category_id || null,
+        is_active: formData.is_active,
+        photo_url: formData.photo_url.trim() || null,
+      };
+
+      const result = await createProduct(productData, token);
+
+      if (result.success) {
+        // Close dialog and reset form
+        setOpenCreateDialog(false);
+        setFormData({
+          name: '',
+          description: '',
+          price: '',
+          category_id: '',
+          is_active: true,
+          photo_url: ''
+        });
+
+        // Refresh the product list
+        fetchProducts();
+
+        // Show success message (optional)
+        console.log('Product created successfully:', result.data);
+      } else {
+        // Handle API errors - show message from response for 400-499 errors
+        if (result.error && typeof result.error === 'object' && result.error.message) {
+          setError(result.error.message);
+        } else if (typeof result.error === 'string') {
+          setError(result.error);
+        } else {
+          setError('Failed to create product');
+        }
+      }
+    } catch (error) {
+      console.error('Error creating product:', error);
+
+      // Handle network or other errors
+      if (error.response && error.response.status >= 400 && error.response.status < 500) {
+        // 400-499 errors - show message from response
+        const errorMessage = error.response.data?.message || error.response.data?.detail || 'Bad request';
+        setError(errorMessage);
+      } else {
+        setError('Failed to create product. Please try again.');
+      }
+    } finally {
+      setCreateLoading(false);
+    }
+  };
+
+  // Handle form input changes
+  const handleFormChange = (field) => (event) => {
+    setFormData(prev => ({
+      ...prev,
+      [field]: event.target.value
+    }));
+  };
+
+  // Open create dialog
+  const handleOpenCreateDialog = () => {
+    setFormData({
+      name: '',
+      description: '',
+      price: '',
+      category_id: '',
+      is_active: true,
+      photo_url: ''
+    });
+    setOpenCreateDialog(true);
+  };
+
   // Debug: Simple early return to test if component renders
   if (!token) {
     return (
@@ -194,7 +291,7 @@ const ProductManagement = () => {
         <Button
           variant="contained"
           startIcon={<Add />}
-          onClick={() => alert('Add Product functionality coming soon!')}
+          onClick={handleOpenCreateDialog}
         >
           Add New Product
         </Button>
@@ -444,6 +541,232 @@ const ProductManagement = () => {
           onRowsPerPageChange={handleChangeRowsPerPage}
         />
       </TableContainer>
+
+      {/* Create Product Dialog */}
+      <Dialog
+        open={openCreateDialog}
+        onClose={() => setOpenCreateDialog(false)}
+        maxWidth="sm"
+        fullWidth
+        slotProps={{
+          paper: {
+            sx: {
+              borderRadius: 2,
+              maxHeight: '90vh',
+            }
+          }
+        }}
+      >
+        <DialogTitle
+          sx={{
+            pb: 1,
+            borderBottom: '1px solid',
+            borderColor: 'divider',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 1
+          }}
+        >
+          <Add color="primary" />
+          Add New Product
+        </DialogTitle>
+
+        <DialogContent
+          sx={{
+            p: 0,
+            maxHeight: '60vh',
+            overflowY: 'auto',
+            '&::-webkit-scrollbar': {
+              width: '8px',
+            },
+            '&::-webkit-scrollbar-track': {
+              background: '#f1f1f1',
+              borderRadius: '4px',
+            },
+            '&::-webkit-scrollbar-thumb': {
+              background: '#c1c1c1',
+              borderRadius: '4px',
+            },
+            '&::-webkit-scrollbar-thumb:hover': {
+              background: '#a8a8a8',
+            },
+          }}
+        >
+          {/* Form Fields List */}
+          <Box sx={{ p: 0 }}>
+            {/* Product Name */}
+            <Box sx={{ p: 3, borderBottom: '1px solid', borderColor: 'divider' }}>
+              <Typography variant="subtitle2" color="text.secondary" gutterBottom>
+                Product Name *
+              </Typography>
+              <TextField
+                fullWidth
+                placeholder="Enter product name"
+                value={formData.name}
+                onChange={handleFormChange('name')}
+                error={!formData.name.trim()}
+                helperText={!formData.name.trim() ? 'Product name is required' : ''}
+                variant="outlined"
+                size="medium"
+              />
+            </Box>
+
+            {/* Description */}
+            <Box sx={{ p: 3, borderBottom: '1px solid', borderColor: 'divider' }}>
+              <Typography variant="subtitle2" color="text.secondary" gutterBottom>
+                Description
+              </Typography>
+              <TextField
+                fullWidth
+                multiline
+                rows={3}
+                placeholder="Enter product description..."
+                value={formData.description}
+                onChange={handleFormChange('description')}
+                variant="outlined"
+                size="medium"
+              />
+            </Box>
+
+            {/* Price */}
+            <Box sx={{ p: 3, borderBottom: '1px solid', borderColor: 'divider' }}>
+              <Typography variant="subtitle2" color="text.secondary" gutterBottom>
+                Price *
+              </Typography>
+              <TextField
+                fullWidth
+                type="number"
+                placeholder="0.00"
+                value={formData.price}
+                onChange={handleFormChange('price')}
+                error={!formData.price || parseFloat(formData.price) <= 0}
+                helperText={!formData.price || parseFloat(formData.price) <= 0 ? 'Valid price is required' : ''}
+                variant="outlined"
+                size="medium"
+                slotProps={{
+                  input: {
+                    startAdornment: <InputAdornment position="start">$</InputAdornment>,
+                  },
+                }}
+              />
+            </Box>
+
+            {/* Category */}
+            <Box sx={{ p: 3, borderBottom: '1px solid', borderColor: 'divider' }}>
+              <Typography variant="subtitle2" color="text.secondary" gutterBottom>
+                Category
+              </Typography>
+              <FormControl fullWidth variant="outlined" size="medium">
+                <Select
+                  value={formData.category_id}
+                  onChange={handleFormChange('category_id')}
+                  displayEmpty
+                  renderValue={(selected) => {
+                    if (!selected) {
+                      return <Typography color="text.secondary">Select a category</Typography>;
+                    }
+                    const category = categories.find(cat => cat.id === selected);
+                    return category ? category.name : 'Unknown Category';
+                  }}
+                >
+                  <MenuItem value="">
+                    <Typography color="text.secondary">No Category</Typography>
+                  </MenuItem>
+                  {categories.map((category) => (
+                    <MenuItem key={category.id} value={category.id}>
+                      {category.name}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </Box>
+
+            {/* Photo URL */}
+            <Box sx={{ p: 3, borderBottom: '1px solid', borderColor: 'divider' }}>
+              <Typography variant="subtitle2" color="text.secondary" gutterBottom>
+                Photo URL
+              </Typography>
+              <TextField
+                fullWidth
+                placeholder="https://example.com/image.jpg"
+                value={formData.photo_url}
+                onChange={handleFormChange('photo_url')}
+                variant="outlined"
+                size="medium"
+              />
+              {formData.photo_url && (
+                <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
+                  Preview: {formData.photo_url.length > 50 ? `${formData.photo_url.substring(0, 50)}...` : formData.photo_url}
+                </Typography>
+              )}
+            </Box>
+
+            {/* Status */}
+            <Box sx={{ p: 3 }}>
+              <Typography variant="subtitle2" color="text.secondary" gutterBottom>
+                Status
+              </Typography>
+              <FormControl fullWidth variant="outlined" size="medium">
+                <Select
+                  value={formData.is_active}
+                  onChange={handleFormChange('is_active')}
+                  renderValue={(selected) => (
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <Chip
+                        label={selected ? 'Active' : 'Inactive'}
+                        color={selected ? 'success' : 'default'}
+                        size="small"
+                      />
+                    </Box>
+                  )}
+                >
+                  <MenuItem value={true}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <Chip label="Active" color="success" size="small" />
+                      <Typography>Product will be visible to customers</Typography>
+                    </Box>
+                  </MenuItem>
+                  <MenuItem value={false}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <Chip label="Inactive" color="default" size="small" />
+                      <Typography>Product will be hidden from customers</Typography>
+                    </Box>
+                  </MenuItem>
+                </Select>
+              </FormControl>
+            </Box>
+          </Box>
+        </DialogContent>
+
+        <DialogActions
+          sx={{
+            p: 3,
+            borderTop: '1px solid',
+            borderColor: 'divider',
+            gap: 2
+          }}
+        >
+          <Button
+            onClick={() => setOpenCreateDialog(false)}
+            disabled={createLoading}
+            variant="outlined"
+            size="large"
+            sx={{ minWidth: 100 }}
+          >
+            Cancel
+          </Button>
+          <Button
+            variant="contained"
+            onClick={handleCreateProduct}
+            disabled={createLoading || !formData.name.trim() || !formData.price || parseFloat(formData.price) <= 0}
+            startIcon={createLoading ? <CircularProgress size={20} /> : <Add />}
+            size="large"
+            sx={{ minWidth: 140 }}
+          >
+            {createLoading ? 'Creating...' : 'Create Product'}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 };
