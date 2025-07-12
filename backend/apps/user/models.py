@@ -1,6 +1,6 @@
 from typing import TYPE_CHECKING
 from datetime import datetime, timezone
-from sqlalchemy import Column, Integer, String, Enum, DateTime 
+from sqlalchemy import Column, Integer, String, Enum, DateTime
 from sqlalchemy.orm import declarative_base
 import enum
 from sqlalchemy.orm import Mapped, relationship
@@ -9,13 +9,17 @@ from apps.product.models import Product
 # https://docs.python.org/3/library/typing.html#typing.TYPE_CHECKING
 
 from typing import List
+
 if TYPE_CHECKING:
     from apps.product.models import Product
+    from apps.bulk_request.models import BulkRequest, BulkRequestPledge
+
 
 class UserTypeEnum(enum.Enum):
     business = "business"
     customer = "customer"
     seller = "seller"
+
 
 class User(BaseDatabaseModel):
     __tablename__ = "user"
@@ -25,8 +29,20 @@ class User(BaseDatabaseModel):
     hashed_password = Column(String(255), nullable=False)
     user_type = Column(Enum(UserTypeEnum), nullable=False)
     created_at = Column(DateTime, default=datetime.now(timezone.utc), nullable=False)
-    updated_at = Column(DateTime, 
-                        default=datetime.now(timezone.utc),
-                        onupdate=datetime.now(timezone.utc),
-                        nullable=False)
-    products: Mapped[List["Product"]] = relationship("Product", back_populates="product_owner")
+    updated_at = Column(
+        DateTime,
+        default=datetime.now(timezone.utc),
+        onupdate=datetime.now(timezone.utc),
+        nullable=False,
+    )
+    products: Mapped[List["Product"]] = relationship(
+        "Product", back_populates="product_owner"
+    )
+
+    # Bulk request relationships
+    bulk_requests: Mapped[List["BulkRequest"]] = relationship(
+        "BulkRequest", back_populates="buyer"
+    )
+    pledges: Mapped[List["BulkRequestPledge"]] = relationship(
+        "BulkRequestPledge", back_populates="farmer"
+    )
