@@ -87,12 +87,18 @@ def create_product(db_session: Session, product_data: dict):
         raise Exception(f"Error creating product: {str(e)}")
 
 
-def update_product(db_session: Session, product_id: int, product_data: dict) -> Product:
+def update_product(
+    db_session: Session, product_id: int, product_data: dict, user_id: int
+) -> Product:
     """
     Update an existing product by its ID in the sqlite db using SQLAlchemy ORM (sync).
     """
     try:
-        product = db_session.query(Product).filter(Product.id == product_id).first()
+        product = (
+            db_session.query(Product)
+            .filter(Product.id == product_id, Product.product_owner_id == user_id)
+            .first()
+        )
         print(f"The Product: {product}")
 
         if not product:

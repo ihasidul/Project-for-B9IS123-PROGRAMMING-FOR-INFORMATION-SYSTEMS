@@ -86,13 +86,22 @@ def delete_product_route(
 
 # Update Product Route
 @router.patch("/{product_id}")
-def update_product_route(product_id: int, product: ProductUpdate, db=Depends(get_db)):
+def update_product_route(
+    request: Request,
+    product_id: int,
+    product: ProductUpdate,
+    db=Depends(get_db),
+    is_authenticated=Depends(is_authenticated),
+):
     """
     Update a product.
     """
     try:
         print("IN UPDATE PRODUCT ROUTE")
-        updated_product = update_product_view(product_id, product, db)
+        user_id = request.state.user_id
+        updated_product = update_product_view(
+            user_id=user_id, product_id=product_id, product_data=product, db=db
+        )
         if not updated_product:
             raise HTTPException(
                 status_code=404, detail=f"Product with id: {product_id} not found"

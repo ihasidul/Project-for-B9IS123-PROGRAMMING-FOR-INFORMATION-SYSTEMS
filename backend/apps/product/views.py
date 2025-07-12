@@ -186,10 +186,10 @@ def delete_product_view(
 
 
 def update_product_view(
-    product_id: int, product_data: ProductUpdate, db: Session
+    user_id: int, product_id: int, product_data: ProductUpdate, db: Session
 ) -> CustomJSONResponse:
     """
-    Update a product by its ID.
+    Update a product by its ID and user ID.
     """
     try:
         print(f"Updating product with ID: {product_id} with data: {product_data}")
@@ -199,9 +199,14 @@ def update_product_view(
             product_data=product_data.model_dump(
                 by_alias=True, exclude_unset=True, exclude_none=True
             ),
+            user_id=user_id,
         )
         if not updated_product:
-            raise Exception(f"Product with ID {product_id} not found")
+            return CustomJSONResponse(
+                content={},
+                message=f"Product with ID {product_id} not found.",
+                status_code=404,
+            )
 
         print(f"Product with ID {product_id} updated successfully.")
         data = {"product": jsonable_encoder(updated_product)}
