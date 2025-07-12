@@ -62,14 +62,28 @@ def get_all_products(
         else:
             stmt = stmt.order_by(asc(sort_column))
 
+        # Get total count for pagination
+        count_stmt = select(func.count()).select_from(stmt.subquery())
+        total_count = db_session.execute(count_stmt).scalar() or 0
+
         # Apply pagination
         stmt = stmt.offset(offset).limit(limit)
         result = db_session.execute(stmt)
         products = result.scalars().all()
-        return products
+
+        return {
+            "success": True,
+            "data": products,
+            "pagination": {
+                "page": page,
+                "limit": limit,
+                "total": total_count,
+                "pages": (total_count + limit - 1) // limit,
+            },
+        }
     except Exception as e:
         print(f"Error fetching products: {str(e)}")
-        raise Exception(f"Error fetching products: {str(e)}")
+        return {"success": False, "error": str(e)}
 
 
 def create_product(db_session: Session, product_data: dict):

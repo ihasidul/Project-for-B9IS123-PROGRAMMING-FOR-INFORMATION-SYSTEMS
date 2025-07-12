@@ -20,7 +20,7 @@ def get_user_products_view(
     Return JSON-serializable list of products.
     """
     try:
-        products = get_all_products(
+        result = get_all_products(
             db_session=db,
             page=query_params.page,
             limit=query_params.limit,
@@ -33,11 +33,25 @@ def get_user_products_view(
             sort_order=query_params.sort_order,
             user_id=user_id,
         )
+
+        if not result["success"]:
+            return CustomJSONResponse(
+                content={"error": result["error"]},
+                status_code=500,
+                message=result["error"],
+            )
+
+        products = result["data"]
+        pagination = result["pagination"]
+
         print(f"Fetched {len(products)} products from the database.")
         if not products:
             print("No products found.")
             return CustomJSONResponse(
-                content={},
+                content={
+                    "products": [],
+                    "pagination": pagination,
+                },
                 message="No products found.",
                 status_code=200,
             )
@@ -60,10 +74,11 @@ def get_user_products_view(
             }
             for product in products
         ]
-
-        print(f"Products fetched: {products}")
         return CustomJSONResponse(
-            content={"products": jsonable_encoder(serialized_products)},
+            content={
+                "products": jsonable_encoder(serialized_products),
+                "pagination": pagination,
+            },
             message="User Products",
             status_code=200,
         )
@@ -72,13 +87,15 @@ def get_user_products_view(
         raise Exception(f"Error in get_user_products_view: {str(e)}")
 
 
-def get_all_product_view(query_params: ProductListQueryParams, db: Session) -> list:
+def get_all_product_view(
+    query_params: ProductListQueryParams, db: Session
+) -> CustomJSONResponse:
     """
     Get all products with optional query parameters for filtering, sorting, and pagination.
     Return JSON-serializable list of products.
     """
     try:
-        products = get_all_products(
+        result = get_all_products(
             db_session=db,
             page=query_params.page,
             limit=query_params.limit,
@@ -90,10 +107,25 @@ def get_all_product_view(query_params: ProductListQueryParams, db: Session) -> l
             sort_by=query_params.sort_by,
             sort_order=query_params.sort_order,
         )
+
+        if not result["success"]:
+            raise Exception(result["error"])
+
+        products = result["data"]
+        pagination = result["pagination"]
+
         print(f"Fetched {len(products)} products from the database.")
         if not products:
             print("No products found.")
-            return []
+            return CustomJSONResponse(
+                content={
+                    "products": [],
+                    "pagination": pagination,
+                },
+                message="No products found.",
+                status_code=200,
+            )
+
         serialized_products = [
             {
                 "id": product.id,
@@ -115,7 +147,14 @@ def get_all_product_view(query_params: ProductListQueryParams, db: Session) -> l
         ]
 
         print(f"Products fetched: {products}")
-        return jsonable_encoder(serialized_products)
+        return CustomJSONResponse(
+            content={
+                "products": jsonable_encoder(serialized_products),
+                "pagination": pagination,
+            },
+            message="Product List",
+            status_code=200,
+        )
     except Exception as e:
         print(f"Error in get_all_product_view: {str(e)}")
         raise Exception(f"Error in get_all_product_view: {str(e)}")

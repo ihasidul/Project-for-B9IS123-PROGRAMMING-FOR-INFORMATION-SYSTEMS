@@ -32,11 +32,10 @@ def get_all_product_route(
     Get all products with optional query parameters for filtering, sorting, and pagination.
     """
     try:
-        data = get_all_product_view(query_params, db)
-        print(f"Products fetched: {data}")
-        return CustomJSONResponse(
-            content={"products": data}, message="Product List", status_code=200
-        )
+        result = get_all_product_view(query_params, db)
+        print(f"Products fetched: {result}")
+        return result
+
     except Exception as e:
         print(f"Error in get_all_product_route: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
@@ -102,10 +101,7 @@ def update_product_route(
         updated_product = update_product_view(
             user_id=user_id, product_id=product_id, product_data=product, db=db
         )
-        if not updated_product:
-            raise HTTPException(
-                status_code=404, detail=f"Product with id: {product_id} not found"
-            )
+
         return updated_product
     except Exception as e:
         print(f"Error in update_product_route: {str(e)}")
