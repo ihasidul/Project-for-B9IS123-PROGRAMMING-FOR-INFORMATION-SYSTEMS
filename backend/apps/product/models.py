@@ -7,6 +7,7 @@ from apps.common.models import BaseDatabaseModel
 
 if TYPE_CHECKING:
     from apps.user.models import User
+    from apps.bulk_request.models import BulkRequest
 
 
 class Category(BaseDatabaseModel):
@@ -19,6 +20,9 @@ class Category(BaseDatabaseModel):
 
     products: Mapped[List["Product"]] = relationship(
         "Product", back_populates="category", cascade="all, delete-orphan"
+    )
+    bulk_requests: Mapped[List["BulkRequest"]] = relationship(
+        "BulkRequest", back_populates="category"
     )
 
     def __repr__(self):
