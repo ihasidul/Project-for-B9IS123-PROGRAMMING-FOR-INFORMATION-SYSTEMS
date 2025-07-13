@@ -456,6 +456,208 @@ const BulkRequestManagement = () => {
           onRowsPerPageChange={handleChangeRowsPerPage}
         />
       </Paper>
+      {/* Create Bulk Request Dialog - Only for Business Users */}
+      {user?.userType === 'business' && (
+        <Dialog
+          open={openCreateDialog}
+          onClose={() => setOpenCreateDialog(false)}
+          maxWidth="md"
+          fullWidth
+        >
+          <DialogTitle>Create New Bulk Request</DialogTitle>
+          <DialogContent sx={{ maxHeight: '70vh', overflowY: 'auto' }}>
+            <Box sx={{ pt: 1 }}>
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+                {/* Title */}
+                <TextField
+                  fullWidth
+                  label="Title *"
+                  value={createFormData.title}
+                  onChange={(e) => handleCreateFormChange('title', e.target.value)}
+                  required
+                />
+
+                {/* Description */}
+                <TextField
+                  fullWidth
+                  label="Description"
+                  value={createFormData.description}
+                  onChange={(e) => handleCreateFormChange('description', e.target.value)}
+                  multiline
+                  rows={3}
+                />
+
+                {/* Product Search */}
+                <Autocomplete
+                  fullWidth
+                  options={products}
+                  getOptionLabel={(option) => option.name || ''}
+                  value={selectedProduct}
+                  onChange={(_, newValue) => handleProductSelect(newValue)}
+                  inputValue={productSearchTerm}
+                  onInputChange={(_, newInputValue) => setProductSearchTerm(newInputValue)}
+                  loading={loadingProducts}
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      label="Product Name *"
+                      required
+                      slotProps={{
+                        input: {
+                          ...params.InputProps,
+                          endAdornment: (
+                            <>
+                              {loadingProducts ? <CircularProgress color="inherit" size={20} /> : null}
+                              {params.InputProps.endAdornment}
+                            </>
+                          ),
+                        }
+                      }}
+                    />
+                  )}
+                  renderOption={(props, option) => (
+                    <Box component="li" {...props}>
+                      <Box>
+                        <Typography variant="body1">{option.name}</Typography>
+                        <Typography variant="body2" color="text.secondary">
+                          {option.category || 'No Category'} • ${option.price}
+                        </Typography>
+                      </Box>
+                    </Box>
+                  )}
+                  noOptionsText={
+                    productSearchTerm.length < 2
+                      ? "Type at least 2 characters to search products"
+                      : "No products found"
+                  }
+                />
+
+                {/* Category */}
+                <Box>
+                  <FormControl fullWidth>
+                    <InputLabel>Category</InputLabel>
+                    <Select
+                      value={createFormData.category_id}
+                      onChange={(e) => handleCreateFormChange('category_id', e.target.value)}
+                      label="Category"
+                      disabled={!!selectedProduct}
+                    >
+                      <MenuItem value="">No Category</MenuItem>
+                      {categories.map((category) => (
+                        <MenuItem key={category.id} value={category.id}>
+                          {category.name}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                  {selectedProduct && (
+                    <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5, display: 'block' }}>
+                      Category auto-filled from selected product
+                    </Typography>
+                  )}
+                </Box>
+
+                {/* Quantity Needed */}
+                <TextField
+                  fullWidth
+                  label="Quantity Needed *"
+                  type="number"
+                  value={createFormData.quantity_needed}
+                  onChange={(e) => handleCreateFormChange('quantity_needed', e.target.value)}
+                  required
+                />
+
+                {/* Unit */}
+                <TextField
+                  fullWidth
+                  label="Unit *"
+                  value={createFormData.unit}
+                  onChange={(e) => handleCreateFormChange('unit', e.target.value)}
+                  placeholder="kg, tons, pieces, etc."
+                  required
+                />
+
+                {/* Max Price Per Unit */}
+                <TextField
+                  fullWidth
+                  label="Max Price Per Unit"
+                  type="number"
+                  value={createFormData.max_price_per_unit}
+                  onChange={(e) => handleCreateFormChange('max_price_per_unit', e.target.value)}
+                  slotProps={{
+                    input: {
+                      startAdornment: <InputAdornment position="start">$</InputAdornment>,
+                    }
+                  }}
+                />
+
+                {/* Total Budget */}
+                <TextField
+                  fullWidth
+                  label="Total Budget"
+                  type="number"
+                  value={createFormData.total_budget}
+                  onChange={(e) => handleCreateFormChange('total_budget', e.target.value)}
+                  slotProps={{
+                    input: {
+                      startAdornment: <InputAdornment position="start">$</InputAdornment>,
+                    }
+                  }}
+                />
+
+                {/* Delivery Deadline */}
+                <TextField
+                  fullWidth
+                  label="Delivery Deadline *"
+                  type="datetime-local"
+                  value={createFormData.delivery_deadline}
+                  onChange={(e) => handleCreateFormChange('delivery_deadline', e.target.value)}
+                  slotProps={{
+                    inputLabel: {
+                      shrink: true,
+                    }
+                  }}
+                  required
+                />
+
+                {/* Delivery Location */}
+                <TextField
+                  fullWidth
+                  label="Delivery Location *"
+                  value={createFormData.delivery_location}
+                  onChange={(e) => handleCreateFormChange('delivery_location', e.target.value)}
+                  required
+                />
+
+                {/* Delivery Instructions */}
+                <TextField
+                  fullWidth
+                  label="Delivery Instructions"
+                  value={createFormData.delivery_instructions}
+                  onChange={(e) => handleCreateFormChange('delivery_instructions', e.target.value)}
+                  multiline
+                  rows={3}
+                />
+              </Box>
+            </Box>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => {
+              setOpenCreateDialog(false);
+              setSelectedProduct(null);
+              setProductSearchTerm('');
+              setProducts([]);
+            }}>Cancel</Button>
+            <Button
+              onClick={handleCreateSubmit}
+              variant="contained"
+              disabled={loading || !createFormData.title || !selectedProduct || !createFormData.quantity_needed || !createFormData.unit || !createFormData.delivery_deadline || !createFormData.delivery_location}
+            >
+              {loading ? <CircularProgress size={20} /> : 'Create Request'}
+            </Button>
+          </DialogActions>
+        </Dialog>
+      )}
     </Box>
   );
 };
