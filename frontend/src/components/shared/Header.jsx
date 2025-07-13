@@ -15,7 +15,15 @@ export default function Header() {
                 <Typography
                     variant="h6"
                     component={Link}
-                    to={isAuthenticated() && user?.userType === 'seller' ? '/dashboard' : '/'}
+                    to={
+                        isAuthenticated()
+                            ? user?.userType === 'seller'
+                                ? '/dashboard'
+                                : user?.userType === 'business'
+                                    ? '/business'
+                                    : '/'
+                            : '/'
+                    }
                     sx={{
                         flexGrow: 1,
                         textDecoration: 'none',
@@ -34,6 +42,15 @@ export default function Header() {
                                     color="inherit"
                                     component={Link}
                                     to="/dashboard"
+                                >
+                                    Dashboard
+                                </Button>
+                            )}
+                            {user?.userType === 'business' && (
+                                <Button
+                                    color="inherit"
+                                    component={Link}
+                                    to="/business"
                                 >
                                     Dashboard
                                 </Button>

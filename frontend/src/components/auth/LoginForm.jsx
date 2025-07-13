@@ -44,6 +44,8 @@ const LoginForm = () => {
         // Redirect based on user type from login result
         if (result.user?.userType === 'seller') {
           navigate({ to: '/dashboard' });
+        } else if (result.user?.userType === 'business') {
+          navigate({ to: '/business' });
         } else {
           navigate({ to: '/' });
         }
