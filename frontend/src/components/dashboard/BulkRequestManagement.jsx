@@ -24,20 +24,27 @@ import {
   Chip,
   Tooltip,
   InputAdornment,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Autocomplete,
 } from '@mui/material';
 import {
   Search,
   FilterList,
   Edit,
+  Add,
   Business,
 } from '@mui/icons-material';
 import { useAuth } from '../../contexts/AuthContext.jsx';
-import getBulkRequests from '../../../api/bulkRequests.js';
+import getBulkRequests, { createBulkRequest } from '../../../api/bulkRequests.js';
 import getCategory from '../../../api/getCategory.js';
+import getAllProducts from '../../../api/getAllProducts.js';
 
 
 const BulkRequestManagement = () => {
-  const { token } = useAuth();
+  const { token, user } = useAuth();
 
   // State for bulk requests and loading
   const [bulkRequests, setBulkRequests] = useState([]);
@@ -65,6 +72,28 @@ const BulkRequestManagement = () => {
   // State for categories
   const [categories, setCategories] = useState([]);
 
+  // State for product search
+  const [products, setProducts] = useState([]);
+  const [productSearchTerm, setProductSearchTerm] = useState('');
+  const [selectedProduct, setSelectedProduct] = useState(null);
+  const [loadingProducts, setLoadingProducts] = useState(false);
+
+  // State for create dialog
+  const [openCreateDialog, setOpenCreateDialog] = useState(false);
+  const [createFormData, setCreateFormData] = useState({
+    title: '',
+    description: '',
+    product_name: '',
+    category_id: '',
+    quantity_needed: '',
+    unit: '',
+    max_price_per_unit: '',
+    total_budget: '',
+    delivery_deadline: '',
+    delivery_location: '',
+    delivery_instructions: '',
+  });
+
 
 
 
@@ -82,6 +111,44 @@ const BulkRequestManagement = () => {
 
     fetchCategories();
   }, []);
+
+  // Search for products
+  const searchProducts = useCallback(async (searchTerm) => {
+    if (!searchTerm || searchTerm.length < 2) {
+      setProducts([]);
+      return;
+    }
+
+    setLoadingProducts(true);
+    try {
+      const result = await getAllProducts({
+        page: 1,
+        limit: 20,
+        search: searchTerm,
+        isActive: true, // Only show active products
+      });
+
+      if (result.success) {
+        setProducts(result.data.products || []);
+      } else {
+        setProducts([]);
+      }
+    } catch (error) {
+      console.error('Error searching products:', error);
+      setProducts([]);
+    } finally {
+      setLoadingProducts(false);
+    }
+  }, []);
+
+  // Debounced product search
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      searchProducts(productSearchTerm);
+    }, 300);
+
+    return () => clearTimeout(timeoutId);
+  }, [productSearchTerm, searchProducts]);
 
   // Fetch bulk requests
   const fetchBulkRequests = useCallback(async () => {
@@ -170,6 +237,68 @@ const BulkRequestManagement = () => {
     setPage(0);
   };
 
+  // Handle create form
+  const handleCreateFormChange = (field, value) => {
+    setCreateFormData(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
+
+  // Handle product selection
+  const handleProductSelect = (product) => {
+    setSelectedProduct(product);
+    setCreateFormData(prev => ({
+      ...prev,
+      product_name: product?.name || '',
+      category_id: product?.category_id || '',
+    }));
+  };
+
+  const handleCreateSubmit = async () => {
+    try {
+      setLoading(true);
+
+      const formData = {
+        ...createFormData,
+        quantity_needed: parseFloat(createFormData.quantity_needed),
+        max_price_per_unit: createFormData.max_price_per_unit ? parseFloat(createFormData.max_price_per_unit) : null,
+        total_budget: createFormData.total_budget ? parseFloat(createFormData.total_budget) : null,
+        category_id: createFormData.category_id || null,
+        delivery_deadline: new Date(createFormData.delivery_deadline).toISOString(),
+      };
+
+      const result = await createBulkRequest(formData, token);
+
+      if (result.success) {
+        setOpenCreateDialog(false);
+        setCreateFormData({
+          title: '',
+          description: '',
+          product_name: '',
+          category_id: '',
+          quantity_needed: '',
+          unit: '',
+          max_price_per_unit: '',
+          total_budget: '',
+          delivery_deadline: '',
+          delivery_location: '',
+          delivery_instructions: '',
+        });
+        setSelectedProduct(null);
+        setProductSearchTerm('');
+        setProducts([]);
+        fetchBulkRequests();
+      } else {
+        setError(result.error);
+      }
+    } catch (error) {
+      setError('Failed to create bulk request');
+    } finally {
+      setLoading(false);
+    }
+  };
+
 
 
   // Status color mapping
@@ -225,7 +354,7 @@ const BulkRequestManagement = () => {
             />
           </Grid>
 
-          <Grid item xs={12} md={1.5}>
+          <Grid item xs={12} sm={6} md={2}>
             <FormControl fullWidth size="small">
               <InputLabel>Category</InputLabel>
               <Select
@@ -327,7 +456,19 @@ const BulkRequestManagement = () => {
             </Button>
           </Grid>
 
-
+          {/* Create Bulk Request Button - Only for Business Users */}
+          {user?.userType === 'business' && (
+            <Grid item xs={12} md={2.5}>
+              <Button
+                variant="contained"
+                startIcon={<Add />}
+                onClick={() => setOpenCreateDialog(true)}
+                fullWidth
+              >
+                Create Bulk Request
+              </Button>
+            </Grid>
+          )}
         </Grid>
       </Paper>
 
@@ -456,6 +597,7 @@ const BulkRequestManagement = () => {
           onRowsPerPageChange={handleChangeRowsPerPage}
         />
       </Paper>
+
       {/* Create Bulk Request Dialog - Only for Business Users */}
       {user?.userType === 'business' && (
         <Dialog
