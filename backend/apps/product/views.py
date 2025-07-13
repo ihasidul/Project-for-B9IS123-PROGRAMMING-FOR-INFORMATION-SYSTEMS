@@ -1,4 +1,5 @@
 from fastapi.encoders import jsonable_encoder
+from fastapi import HTTPException
 from sqlalchemy.orm import Session
 from apps.product.services import (
     get_all_products,
@@ -84,7 +85,9 @@ def get_user_products_view(
         )
     except Exception as e:
         print(f"Error in get_user_products_view: {str(e)}")
-        raise Exception(f"Error in get_user_products_view: {str(e)}")
+        raise HTTPException(
+            status_code=500, detail=f"Error in get_user_products_view: {str(e)}"
+        )
 
 
 def get_all_product_view(
@@ -109,7 +112,7 @@ def get_all_product_view(
         )
 
         if not result["success"]:
-            raise Exception(result["error"])
+            raise HTTPException(status_code=500, detail=result["error"])
 
         products = result["data"]
         pagination = result["pagination"]
@@ -157,7 +160,9 @@ def get_all_product_view(
         )
     except Exception as e:
         print(f"Error in get_all_product_view: {str(e)}")
-        raise Exception(f"Error in get_all_product_view: {str(e)}")
+        raise HTTPException(
+            status_code=500, detail=f"Error in get_all_product_view: {str(e)}"
+        )
 
 
 def create_product_view(
@@ -191,7 +196,9 @@ def create_product_view(
         )
     except Exception as e:
         print(f"Error in create_product_view: {str(e)}")
-        raise Exception(f"Error in create_product_view: {str(e)}")
+        raise HTTPException(
+            status_code=500, detail=f"Error in create_product_view: {str(e)}"
+        )
 
 
 def delete_product_view(
@@ -221,7 +228,9 @@ def delete_product_view(
             )
     except Exception as e:
         print(f"Error in delete_product_view: {str(e)}")
-        raise Exception(f"Error in delete_product_view: {str(e)}")
+        raise HTTPException(
+            status_code=500, detail=f"Error in delete_product_view: {str(e)}"
+        )
 
 
 def update_product_view(
@@ -256,7 +265,9 @@ def update_product_view(
         )
     except Exception as e:
         print(f"Error in update_product_view: {str(e)}")
-        raise Exception(f"Error in update_product_view: {str(e)}")
+        raise HTTPException(
+            status_code=500, detail=f"Error in update_product_view: {str(e)}"
+        )
 
 
 def get_all_product_categories_view(db: Session) -> CustomJSONResponse:
@@ -288,4 +299,6 @@ def get_all_product_categories_view(db: Session) -> CustomJSONResponse:
         )
     except Exception as e:
         print(f"Error in get_all_product_category_view: {str(e)}")
-        raise Exception(f"Error in get_all_product_category_view: {str(e)}")
+        raise HTTPException(
+            status_code=500, detail=f"Error in get_all_product_category_view: {str(e)}"
+        )

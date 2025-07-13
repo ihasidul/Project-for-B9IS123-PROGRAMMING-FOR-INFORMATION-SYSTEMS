@@ -1,4 +1,5 @@
 from typing import Union, Optional
+from fastapi import HTTPException
 from sqlalchemy import select, func, or_, asc, desc
 from sqlalchemy.orm import Session
 from apps.product.models import Product, Category
@@ -83,7 +84,9 @@ def get_all_products(
         }
     except Exception as e:
         print(f"Error fetching products: {str(e)}")
-        return {"success": False, "error": str(e)}
+        raise HTTPException(
+            status_code=500, detail=f"Error fetching products: {str(e)}"
+        )
 
 
 def create_product(db_session: Session, product_data: dict):
@@ -98,7 +101,7 @@ def create_product(db_session: Session, product_data: dict):
         return new_product
     except Exception as e:
         print(f"Error creating product: {str(e)}")
-        raise Exception(f"Error creating product: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Error creating product: {str(e)}")
 
 
 def update_product(
@@ -117,7 +120,9 @@ def update_product(
 
         if not product:
             print(f"Product with ID {product_id} not found.")
-            raise Exception(f"Product with ID {product_id} not found.")
+            raise HTTPException(
+                status_code=404, detail=f"Product with ID {product_id} not found."
+            )
 
         for key, value in product_data.items():
             setattr(product, key, value)
@@ -128,7 +133,7 @@ def update_product(
         return product
     except Exception as e:
         print(f"Error updating product: {str(e)}")
-        raise Exception(f"Error updating product: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Error updating product: {str(e)}")
 
 
 def delete_product(db_session: Session, product_id: int, user_id: int) -> bool:
@@ -153,7 +158,7 @@ def delete_product(db_session: Session, product_id: int, user_id: int) -> bool:
         return True
     except Exception as e:
         print(f"Error deleting product: {str(e)}")
-        raise Exception(f"Error deleting product: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Error deleting product: {str(e)}")
 
 
 def get_all_product_categories(db_session: Session) -> list:
@@ -167,7 +172,9 @@ def get_all_product_categories(db_session: Session) -> list:
         return categories
     except Exception as e:
         print(f"Error fetching product categories: {str(e)}")
-        raise Exception(f"Error fetching product categories: {str(e)}")
+        raise HTTPException(
+            status_code=500, detail=f"Error fetching product categories: {str(e)}"
+        )
 
 
 def product_exists_for_user(
@@ -185,4 +192,6 @@ def product_exists_for_user(
         return product is not None
     except Exception as e:
         print(f"Error checking product existence: {str(e)}")
-        raise Exception(f"Error checking product existence: {str(e)}")
+        raise HTTPException(
+            status_code=500, detail=f"Error checking product existence: {str(e)}"
+        )
