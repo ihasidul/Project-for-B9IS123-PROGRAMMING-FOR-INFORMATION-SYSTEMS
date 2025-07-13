@@ -1,7 +1,6 @@
 from fastapi import APIRouter, Request, HTTPException, Depends
 from apps.bulk_request.schemas import (
     BulkRequestCreate,
-    BulkRequestUpdate,
     BulkRequestListQueryParams,
 )
 from apps.user.models import UserTypeEnum

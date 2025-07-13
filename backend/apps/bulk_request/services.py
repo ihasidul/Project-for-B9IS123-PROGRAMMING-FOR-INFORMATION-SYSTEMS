@@ -3,7 +3,7 @@ from fastapi import HTTPException
 from sqlalchemy import select, func, or_, asc, desc
 from sqlalchemy.orm import Session
 from apps.bulk_request.models import BulkRequest, BulkRequestPledge, BulkRequestStatus
-from apps.bulk_request.schemas import BulkRequestCreate, BulkRequestUpdate
+from apps.bulk_request.schemas import BulkRequestCreate
 
 
 def get_all_bulk_requests(

@@ -7,7 +7,6 @@ from apps.bulk_request.services import (
 )
 from apps.bulk_request.schemas import (
     BulkRequestCreate,
-    BulkRequestUpdate,
     BulkRequestListQueryParams,
 )
 from apps.common.custom_response import CustomJSONResponse
