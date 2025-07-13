@@ -1,6 +1,7 @@
 from typing import Annotated, Optional, Literal
 from pydantic import BaseModel, conint, Field
 from datetime import datetime
+from apps.bulk_request.models import BulkRequestStatus
 
 
 class BulkRequestListQueryParams(BaseModel):
@@ -8,7 +9,7 @@ class BulkRequestListQueryParams(BaseModel):
     limit: Annotated[int, conint(gt=0)] = 10
     search: str | None = None
     category_id: Optional[int] = None
-    status: Optional[str] = None
+    status: Optional[BulkRequestStatus] = None
     min_quantity: Optional[float] = None
     max_quantity: Optional[float] = None
     min_price: Optional[float] = None

@@ -44,7 +44,9 @@ def get_all_bulk_requests(
 
         if category_id is not None:
             stmt = stmt.where(BulkRequest.category_id == category_id)
-
+        print("*" * 80)
+        print(f"Status: {status}")
+        print("*" * 80)
         if status is not None:
             stmt = stmt.where(BulkRequest.status == status)
 
