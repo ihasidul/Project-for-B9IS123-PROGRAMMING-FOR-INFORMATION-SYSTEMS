@@ -7,8 +7,9 @@ import {
   Tab,
   Paper,
 } from '@mui/material';
-import { Dashboard, Inventory, ShoppingCart } from '@mui/icons-material';
+import { Dashboard, Inventory, Business } from '@mui/icons-material';
 import ProductManagement from './ProductManagement.jsx';
+import BulkRequestManagement from './BulkRequestManagement.jsx';
 import { useAuth } from '../../contexts/AuthContext.jsx';
 
 function TabPanel({ children, value, index, ...other }) {
@@ -43,7 +44,7 @@ const FarmerDashboard = () => {
   // Debug: Log component render
   console.log('FarmerDashboard rendering...', { user, tabValue });
 
-  const handleTabChange = (event, newValue) => {
+  const handleTabChange = (_, newValue) => {
     setTabValue(newValue);
   };
 
@@ -55,7 +56,7 @@ const FarmerDashboard = () => {
           Farmer Dashboard
         </Typography>
         <Typography variant="subtitle1" color="text.secondary">
-          Welcome back, {user?.username}! Manage your products and orders here.
+          Welcome back, {user?.username}! Manage your products and bulk requests here.
         </Typography>
       </Box>
 
@@ -78,8 +79,8 @@ const FarmerDashboard = () => {
             {...a11yProps(1)}
           />
           <Tab
-            icon={<ShoppingCart />}
-            label="Orders"
+            icon={<Business />}
+            label="Bulk Requests"
             {...a11yProps(2)}
           />
         </Tabs>
@@ -100,12 +101,7 @@ const FarmerDashboard = () => {
       </TabPanel>
 
       <TabPanel value={tabValue} index={2}>
-        <Typography variant="h6" gutterBottom>
-          Order Management
-        </Typography>
-        <Typography variant="body1" color="text.secondary">
-          Order management content coming soon...
-        </Typography>
+        <BulkRequestManagement />
       </TabPanel>
     </Container>
   );
